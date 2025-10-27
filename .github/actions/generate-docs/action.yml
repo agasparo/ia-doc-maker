@@ -7,10 +7,10 @@ inputs:
   path:
     description: "Path to the code folder to document"
     required: true
-    default: "src"
+    default: "."
 runs:
   using: "node24"
-  main: "index.js"
+  main: "dist/index.js"
 branding:
   color: "blue"
   icon: "book"

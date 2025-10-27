@@ -1,31 +1,33 @@
-name: "Generate docs"
+name: "Generate Documentation with AI"
+
 on:
   workflow_dispatch:
     inputs:
       code_folder:
-        description: "Folder path of code to document"
+        description: "Path to the code folder to document"
         required: true
         default: "src"
 
 jobs:
   generate-docs:
+    name: Generate Documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install dependencies for the local action
-        run: |
-          cd ./.github/actions/generate-docs
-          npm install
-
-      - name: Run AI documentation generator
-        uses: ./.github/actions/generate-docs
+      # Run AI documentation generator (action bundle autonome)
+      - name: Generate documentation with OpenAI
+        uses: ./.github/actions/generate-docs #user/my-ai-doc-action@main   # ou @v1 si tagué
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           path: ${{ github.event.inputs.code_folder }}
 
+      # Upload the generated README as artifact
       - name: Upload generated README
         uses: actions/upload-artifact@v4
         with:
           name: generated-docs
           path: README.md
+

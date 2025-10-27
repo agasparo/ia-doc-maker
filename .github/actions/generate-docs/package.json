@@ -1,14 +1,24 @@
 {
-  "name": "generate-docs",
+  "name": "generate-ia-docs",
   "version": "1.0.0",
-  "description": "",
+  "description": "GitHub Action to automatically generate professional code documentation and README using OpenAI GPT models",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build index.js -o dist",
+    "start": "node index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "github-action",
+    "documentation",
+    "openai",
+    "README",
+    "code-docs",
+    "ai",
+    "automation"
+  ],
+  "author": "Arthur Gasparotto <arthurysiite@gmail.com>",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "@actions/core": "^1.11.1",

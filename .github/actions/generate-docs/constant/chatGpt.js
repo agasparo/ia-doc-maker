@@ -4,6 +4,10 @@ export const PROMPT = `
 You are an expert technical writer and code documentation specialist. 
 Your task is to generate comprehensive, professional, and clear documentation for the following code.
 
+Important: Do NOT add any generic concluding sentence at the end of the README. 
+End the README naturally after the last section (License, Contribution, or Dependencies if present). 
+Do not summarize or write any extra comments outside of the required sections.
+
 Requirements:
 
 1. README.md (mandatory):
@@ -29,4 +33,5 @@ Requirements:
    - Use professional language and consistent formatting throughout.
 
 Here is the code:
+
 `;
