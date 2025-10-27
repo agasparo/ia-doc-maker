@@ -13,14 +13,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run AI documentation generator
-        uses: ./.github/actions/generate-docs
-        with:
-          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-          path: ${{ github.event.inputs.code_folder }}
+      # Installer les dépendances de l'action
+      - name: Install dependencies for the action
+        run: |
+          cd ./.github/actions/generate-docs
+          npm install
 
+      # Exécuter l'action avec Node
+      - name: Run AI documentation generator
+        run: |
+          cd ./.github/actions/generate-docs
+          node index.js
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CODE_PATH: ${{ github.event.inputs.code_folder }}
+
+      # Télécharger le README généré comme artefact
       - name: Upload README as artifact
         uses: actions/upload-artifact@v4
         with:
           name: generated-docs
-          path: README.md
+          path: ./.github/actions/generate-docs/README.md
