@@ -1,8 +1,8 @@
-name: "AI Documentation Generator"
-description: "Generate documentation automatically using OpenAI"
+name: "Generate AI Documentation"
+description: "Generate professional code documentation using OpenAI"
 inputs:
   openai_api_key:
-    description: "OpenAI API key"
+    description: "Your OpenAI API key"
     required: true
   path:
     description: "Path to the code folder to document"
