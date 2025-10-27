@@ -8,11 +8,11 @@ GitHub Action to automatically generate professional code documentation and READ
 
 ## Features
 
-- Generate a comprehensive `README.md` with project title, description, usage examples, features, configuration, dependencies, contribution guidelines, and license information.
-- Add inline documentation (docstrings/comments) to all functions, classes, and modules in your code.
-- Supports multiple programming languages: **JavaScript, TypeScript, Python, and PHP**.
-- Fully reusable in external workflows with user-provided OpenAI API key.
-- Bundled for easy use, no need to manually install dependencies if using the `dist/` build.
+- Generate a comprehensive `README.md` with project title, description, usage examples, features, configuration, dependencies, contribution guidelines, and license information
+- Add inline documentation (docstrings/comments) to all functions, classes, and modules in your code
+- Supports multiple programming languages: **JavaScript, TypeScript, Python, and PHP**
+- Fully reusable in external workflows with user-provided OpenAI API key
+- Bundled for easy use, no need to manually install dependencies
 
 ---
 
