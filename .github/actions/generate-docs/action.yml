@@ -7,7 +7,7 @@ inputs:
   path:
     description: "Path to the code folder to document"
     required: true
-    default: "."
+    default: "src"
 runs:
   using: "node24"
   main: "index.js"
