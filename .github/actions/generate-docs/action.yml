@@ -1,0 +1,16 @@
+name: "AI Documentation Generator"
+description: "Generate documentation automatically using OpenAI"
+inputs:
+  openai_api_key:
+    description: "OpenAI API key"
+    required: true
+  path:
+    description: "Path to the code folder to document"
+    required: true
+    default: "."
+runs:
+  using: "node24"
+  main: "index.js"
+branding:
+  color: "blue"
+  icon: "book"
