@@ -2,50 +2,93 @@ import fs from "fs";
 import path from "node:path";
 import core from "@actions/core";
 import OpenAI from "openai";
+import {MODEL, ROLE, PROMPT} from './constant/chatGpt';
+import {RESPONSE_FILE, ALLOWED_FILE_EXTENSION} from './constant/file';
 
-async function run() {
-  try {
-    const apiKey = core.getInput("openai_api_key", { required: true });
-    const codePath = core.getInput("path", { required: true });
+/**
+ * Récupère les inputs de l'action GitHub
+ * @returns {{ apiKey: string, codePath: string }}
+ */
+function getInputs() {
+  const apiKey = core.getInput("openai_api_key", { required: true });
+  const codePath = core.getInput("path", { required: true });
+  return { apiKey, codePath };
+}
 
-    const openai = new OpenAI({ apiKey });
+/**
+ * Lit récursivement un dossier et concatène le contenu des fichiers autorisés
+ * @param {string} dir - Chemin du dossier à lire
+ * @returns {string} Contenu concaténé des fichiers
+ */
+function readDirRecursively(dir) {
+  let codeContent = "";
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
 
-    // Lire le code dans le dossier spécifié
-    const absPath = path.resolve(process.cwd(), codePath);
-    let codeContent = "";
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
 
-    function readDirRec(dir) {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        const full = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-          readDirRec(full);
-        } else if (entry.isFile()) {
-          const ext = path.extname(entry.name);
-          if ([".js", ".ts", ".py"].includes(ext)) {
-            const fileData = fs.readFileSync(full, "utf-8");
-            codeContent += `# File: ${path.relative(process.cwd(), full)}\n${fileData}\n\n`;
-          }
+    if (entry.isDirectory()) {
+      codeContent += readDirRecursively(fullPath);
+    } else if (entry.isFile()) {
+      const ext = path.extname(entry.name);
+      if (ALLOWED_FILE_EXTENSION.includes(ext)) {
+        try {
+          const fileData = fs.readFileSync(fullPath, "utf-8");
+          codeContent += `# File: ${path.relative(process.cwd(), fullPath)}\n${fileData}\n\n`;
+        } catch (err) {
+          core.warning(`Failed to read file ${fullPath}: ${err.message}`);
         }
       }
     }
+  }
 
-    readDirRec(absPath);
+  return codeContent;
+}
 
-    const prompt = `You are an expert technical writer. Generate a professional README.md and inline documentation for the following code:\n\n${codeContent}`;
+/**
+ * Génère la documentation avec OpenAI
+ * @param {string} apiKey - Clé API OpenAI
+ * @param {string} codeContent - Contenu du code à documenter
+ * @returns {Promise<string>} Documentation générée
+ */
+async function generateDocumentation(apiKey, codeContent) {
+  const openai = new OpenAI({ apiKey });
+  const completion = await openai.chat.completions.create({
+    model: MODEL,
+    messages: [{ role: ROLE, content: `${PROMPT}\n\n${codeContent}` }],
+  });
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-    });
+  return completion.choices[0].message.content;
+}
 
-    const documentation = completion.choices[0].message.content;
+/**
+ * Écrit la documentation dans un fichier
+ * @param {string} content - Contenu à écrire
+ * @param {string} fileName - Nom du fichier de sortie
+ */
+function writeDocumentation(content, fileName = RESPONSE_FILE) {
+  fs.writeFileSync(path.join(process.cwd(), fileName), content);
+  core.info(`${fileName} created successfully.`);
+}
 
-    fs.writeFileSync(path.join(process.cwd(), "README.md"), documentation);
+/**
+ * Fonction principale
+ */
+async function run() {
+  try {
+    const { apiKey, codePath } = getInputs();
+    const absPath = path.resolve(process.cwd(), codePath);
+    const codeContent = readDirRecursively(absPath);
 
-    core.info("Documentation generated and README.md created");
+    if (!codeContent) {
+      core.warning("No code files found to document.");
+      return;
+    }
+
+    const documentation = await generateDocumentation(apiKey, codeContent);
+    writeDocumentation(documentation);
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(`Failed to generate documentation: ${error.message}`);
   }
 }
 
