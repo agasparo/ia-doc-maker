@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "node:path";
 import core from "@actions/core";
 import OpenAI from "openai";
-import {MODEL, ROLE, PROMPT} from './constant/chatGpt';
-import {RESPONSE_FILE, ALLOWED_FILE_EXTENSION} from './constant/file';
+import {MODEL, ROLE, PROMPT} from './constant/chatGpt.js';
+import {RESPONSE_FILE, ALLOWED_FILE_EXTENSION} from './constant/file.js';
 
 /**
  * Récupère les inputs de l'action GitHub
