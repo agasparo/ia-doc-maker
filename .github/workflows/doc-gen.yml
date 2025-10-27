@@ -13,7 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate docs with OpenAI
+      - name: Install dependencies for the local action
+        run: |
+          cd ./.github/actions/generate-docs
+          npm install
+
+      - name: Run AI documentation generator
         uses: ./.github/actions/generate-docs
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
