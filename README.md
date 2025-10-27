@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate documentation
-        uses: TON_USER/my-ai-doc-action@v1
+        uses: agasparo/ia-doc-maker@v1.0.0
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           path: ${{ github.event.inputs.code_folder }}
