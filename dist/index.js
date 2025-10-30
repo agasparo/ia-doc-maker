@@ -35536,6 +35536,7 @@ Guidelines:
    - Do NOT include Markdown, plain text outside HTML, or code fences.
    - DO NOT use triple backticks (html) or any Markdown-style code fences to encapsulate the HTML.
    - Output must be valid, self-contained HTML directly viewable in a browser.
+   - DO NOT use \`\`\`html
 
 2. Consistent structure for all files:
    - Title / File Name as <h1>
@@ -35554,14 +35555,21 @@ Guidelines:
    - Use Tailwind CSS classes only for styling (bg-gray-900, text-green-400, text-blue-400, text-yellow-400, etc.), do NOT generate inline <style> or <link> tags, except for the Tailwind CDN in the template.
    - Use a palette of gray tones for backgrounds, text, and elements.
    - Ensure the same template, layout, and styling is used for all files.
+   - Ensure proper spacing, indentation, and layout throughout the HTML.
+   - Use consistent padding, margins, and line spacing to make the content visually clean and easy to read.
+   - Code blocks, headings, lists, and paragraphs should all have appropriate spacing so that the page feels structured and not cluttered.
+   - Maintain a visually appealing hierarchy with headings, subheadings, and section breaks.
    - Before returning the HTML for any file, ensure that it is fully valid HTML, well-formed, and uses the same layout, structure, and Tailwind styling as all other pages.
    - Do not include any broken tags, missing closing tags, or inconsistent styles.
    - All generated HTML should render correctly in a browser and look visually consistent across all files.
 
 
 3. Navigation:
-   - For each file, generate an internal **table of contents / nav bar** linking to each main section and subsection (<h2>, <h3>) so users can jump directly to any part of the documentation.
-   - Links should be functional and maintain relative paths if nested in folders.
+   - For each file, generate a **sticky left sidebar** that remains visible when scrolling the page.
+   - The sidebar should contain a **table of contents** linking to each main section and subsection (<h2>, <h3>).
+   - Links must be fully functional and maintain correct relative paths, even for files nested in subfolders.
+   - The sidebar should be styled consistently using Tailwind CSS classes, with proper spacing, clear hierarchy, and good contrast.
+   - Ensure the sidebar is responsive and does not overlap main content on different screen sizes.
 
 4. Examples:
    - Provide multiple practical examples per function/class when relevant.
