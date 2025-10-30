@@ -38,55 +38,91 @@ async function generateDocForFile(client, code) {
   return response.output_text || response.output?.[0]?.content?.[0]?.text || "";
 }
 
-/** Template HTML avec sidebar et palette grise */
-function wrapInTemplate(title, bodyContent, structure) {
- const sidebarLinks = Object.entries(structure)
-  .map(([category, files]) => {
-    const links = files.map(file => {
-      const fileName = path.basename(file, path.extname(file));
-      return `<li class="mb-1"><a href="${category}/${fileName}.html" class="text-gray-700 hover:text-blue-600">${fileName}</a></li>`;
-    }).join("\n");
+/** Génère les liens de la sidebar avec compatibilité sous-dossiers */
+function generateSidebarLinks(structure, currentFilePath = "") {
+  return Object.entries(structure)
+    .map(([category, files]) => {
+      const links = files
+        .map((file) => {
+          const fileName = path.basename(file, path.extname(file));
+          const relativePath = path.relative(
+            path.dirname(currentFilePath),
+            path.join(category, `${fileName}.html`)
+          );
+          return `
+            <li>
+              <a href="${relativePath}"
+                 class="block px-3 py-1.5 rounded-md text-gray-800/90 hover:text-blue-600 hover:bg-white/40 transition-all duration-200">
+                ${fileName}
+              </a>
+            </li>
+          `;
+        })
+        .join("\n");
 
-    return `
-      <div class="mb-4">
-        <h3 class="font-semibold text-gray-800">${category}</h3>
-        <ul class="ml-4 list-disc">
-          ${links}
-        </ul>
-      </div>
-    `;
-  })
-  .join("\n");
+      return `
+        <div class="mb-5">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-600/80 mb-2">${category}</h3>
+          <ul class="space-y-1">${links}</ul>
+        </div>
+      `;
+    })
+    .join("\n");
+}
+
+/** Template HTML avec design iOS-style glassmorphism via Tailwind */
+function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
+  const sidebarLinks = generateSidebarLinks(structure, currentFilePath);
 
   return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>${title}</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>${title}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans">
-<div class="flex min-h-screen">
-  <!-- Sidebar -->
-  <aside class="w-64 bg-gray-200 p-6 flex flex-col">
-    <div class="flex items-center mb-8">
-      <span class="text-xl font-bold text-gray-800">Documentation</span>
-    </div>
-    <nav class="flex-1 overflow-y-auto">
-      ${sidebarLinks}
-    </nav>
-  </aside>
+<body class="bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 text-gray-900 font-sans antialiased">
+  <div class="flex min-h-screen">
 
-  <!-- Main content -->
-  <main class="flex-1 p-8 overflow-auto">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">${title}</h1>
-    <div class="prose max-w-none bg-white p-6 rounded shadow">
-      ${bodyContent}
-    </div>
-  </main>
-</div>
+    <!-- Sidebar -->
+    <aside class="fixed inset-y-0 left-0 w-72 p-6 border-r border-white/30 bg-white/40 backdrop-blur-xl shadow-lg flex flex-col">
+      <div class="flex items-center mb-10">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
+             alt="Logo"
+             class="w-9 h-9 mr-3 opacity-90 drop-shadow-md" />
+        <span class="text-2xl font-semibold text-gray-900/90 tracking-tight">AI Docs</span>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto pr-2 space-y-3">
+        ${sidebarLinks}
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-72 p-12">
+      <div class="bg-white/60 backdrop-blur-xl border border-white/40 rounded-3xl shadow-2xl p-10 max-w-5xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8 text-gray-900/90 tracking-tight">${title}</h1>
+
+        <div class="prose prose-gray max-w-none text-gray-800 leading-relaxed">
+          ${bodyContent}
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Défilement doux pour les ancres internes
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener("click", function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute("href")).scrollIntoView({
+          behavior: "smooth"
+        });
+      });
+    });
+  </script>
 </body>
 </html>
 `;
@@ -109,32 +145,39 @@ async function run() {
 
     const structure = {};
 
-    // Crée la structure des fichiers par catégorie
+    // Construit la structure imbriquée
     for (const file of codeFiles) {
       const relativePath = path.relative(targetPath, file);
-      const category = path.dirname(relativePath) || "root";
+      const parts = relativePath.split(path.sep);
+      let current = structure;
 
-      if (!structure[category]) structure[category] = [];
-      structure[category].push(file);
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (!current[parts[i]]) current[parts[i]] = {};
+        current = current[parts[i]];
+      }
+
+      const category = parts[parts.length - 2] || "root";
+      if (!current[category]) current[category] = [];
+      current[category].push(file);
     }
 
     // Génère la doc pour chaque fichier
-    for (const [category, files] of Object.entries(structure)) {
-      const outputDir = path.join(OUTPUT_DIR, category);
+    for (const file of codeFiles) {
+      const relativePath = path.relative(targetPath, file);
+      const outputDir = path.join(OUTPUT_DIR, path.dirname(relativePath));
       fs.mkdirSync(outputDir, { recursive: true });
 
-      for (const file of files) {
-        const fileName = path.basename(file, path.extname(file));
-        const code = fs.readFileSync(file, "utf-8");
-        const htmlBody = await generateDocForFile(client, code);
+      const fileName = path.basename(file, path.extname(file));
+      const code = fs.readFileSync(file, "utf-8");
+      const htmlBody = await generateDocForFile(client, code);
+      const currentFilePath = path.join(path.dirname(relativePath), `${fileName}.html`).replace(/\\/g, "/");
 
-        const fullHTML = wrapInTemplate(fileName, htmlBody, structure);
-        fs.writeFileSync(path.join(outputDir, `${fileName}.html`), fullHTML, "utf-8");
-        core.info(`Generated doc for ${file}`);
-      }
+      const fullHTML = wrapInTemplate(fileName, htmlBody, structure, currentFilePath);
+      fs.writeFileSync(path.join(outputDir, `${fileName}.html`), fullHTML, "utf-8");
+      core.info(`Generated doc for ${relativePath}`);
     }
 
-    core.info(`All documentation generated successfully in ${OUTPUT_DIR}`);
+    core.info(`Documentation generated successfully in ${OUTPUT_DIR}`);
   } catch (error) {
     core.setFailed(`Failed to generate documentation: ${error.message}`);
   }

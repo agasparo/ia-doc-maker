@@ -14,7 +14,7 @@ Guidelines:
    - Do NOT include Markdown, plain text outside HTML, or code fences.
    - DO NOT use triple backticks (html) or any Markdown-style code fences to encapsulate the HTML.
    - Output must be valid, self-contained HTML directly viewable in a browser.
-   - DO NOT use \`\`\`html
+   - DO NOT use \`\`\`html \`\`\` to enclose final html
 
 2. Consistent structure for all files:
    - Title / File Name as <h1>
@@ -25,12 +25,13 @@ Guidelines:
    - Usage examples with realistic, executable code snippets
    - Detailed inline explanations for functions/classes (parameters, return values, side effects)
    - Optional notes for complex logic or algorithms, explained clearly
-   - All code blocks (<pre><code>) should resemble real IDE syntax highlighting (use Tailwind classes like bg-gray-900, text-green-400, text-blue-400, text-yellow-400, etc.).
+   - All code blocks (<pre><code>) should resemble real IDE syntax highlighting
    - Every <pre><code> block must include Tailwind CSS classes explicitly on both <pre> and <code> tags.
-   Example: <pre class="bg-gray-900 p-4 rounded"><code class="language-js text-green-400 text-sm">...</code></pre>
+   Example: <pre class="p-4 rounded"><code class="language-js text-sm">...</code></pre>
    - Do NOT omit any styling for code blocks. All code blocks should consistently use these classes for background, padding, rounded corners, and syntax colors.
+   - Ensure long lines of code never overflow outside the viewport (use Tailwind utilities like overflow-x-auto, whitespace-pre, and break-words where needed).
    - All <pre><code> blocks across all files must look identical, with same Tailwind classes, padding, font size, and background, regardless of the file or language.
-   - Use Tailwind CSS classes only for styling (bg-gray-900, text-green-400, text-blue-400, text-yellow-400, etc.), do NOT generate inline <style> or <link> tags, except for the Tailwind CDN in the template.
+   - Use Tailwind CSS classes only for styling do NOT generate inline <style> or <link> tags, except for the Tailwind CDN in the template.
    - Use a palette of gray tones for backgrounds, text, and elements.
    - Ensure the same template, layout, and styling is used for all files.
    - Ensure proper spacing, indentation, and layout throughout the HTML.
@@ -56,12 +57,17 @@ Guidelines:
    - Apply realistic IDE-like highlighting using Tailwind classes.
    - Ensure code blocks are readable, visually appealing, and resemble what a developer would see in VS Code.
 
-6. Style:
-   - Clean, modern, readable, and professional.
-   - Consistent headings (<h1>–<h3>), paragraphs, lists.
-   - Ensure accessible colors and good contrast.
-   - Apply consistent padding, margins, and responsive design using Tailwind CSS.
-   - Avoid license, contribution, or generic closing sections.
+6. Style and design:
+   - Use Tailwind CSS only (no inline CSS, no <style> tags).
+   - Visual style should reflect a clean iOS-like glassmorphism aesthetic:
+     Soft gradients, translucent panels, blur effects, white/gray palette.
+   - Use Tailwind utilities like:
+     bg-white/40, backdrop-blur-xl, border border-white/30, shadow-2xl, rounded-3xl, p-10, text-gray-900/90.
+   - Maintain proper spacing and layout consistency:
+     * Adequate spacing between sections (mt-8, mb-6, etc.)
+     * Structured indentation for readability
+     * Visual hierarchy with consistent <h2>, <h3> styling
+   - Ensure the document feels clean, modern, and readable on desktop and mobile.
 
 7. Clarity and completeness:
    - Explain complex code and logic clearly.
