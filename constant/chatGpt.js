@@ -12,7 +12,7 @@ Guidelines:
 
 1. HTML output only: 
    - Do NOT include Markdown, plain text outside HTML, or code fences.
-   - DO NOT use triple backticks (\`\`\`html\`\`\`) or any Markdown-style code fences to encapsulate the HTML.
+   - DO NOT use triple backticks (html) or any Markdown-style code fences to encapsulate the HTML.
    - Output must be valid, self-contained HTML directly viewable in a browser.
 
 2. Consistent structure for all files:
@@ -24,10 +24,18 @@ Guidelines:
    - Usage examples with realistic, executable code snippets
    - Detailed inline explanations for functions/classes (parameters, return values, side effects)
    - Optional notes for complex logic or algorithms, explained clearly
-   - All code blocks (<pre><code>) must resemble real IDE syntax highlighting (VS Code style) with proper coloring for keywords, strings, functions, variables, comments, types, etc.
+   - All code blocks (<pre><code>) should resemble real IDE syntax highlighting (use Tailwind classes like bg-gray-900, text-green-400, text-blue-400, text-yellow-400, etc.).
+   - Every <pre><code> block must include Tailwind CSS classes explicitly on both <pre> and <code> tags.
+   Example: <pre class="bg-gray-900 p-4 rounded"><code class="language-js text-green-400 text-sm">...</code></pre>
+   - Do NOT omit any styling for code blocks. All code blocks should consistently use these classes for background, padding, rounded corners, and syntax colors.
+   - All <pre><code> blocks across all files must look identical, with same Tailwind classes, padding, font size, and background, regardless of the file or language.
    - Use Tailwind CSS classes only for styling (bg-gray-900, text-green-400, text-blue-400, text-yellow-400, etc.), do NOT generate inline <style> or <link> tags, except for the Tailwind CDN in the template.
    - Use a palette of gray tones for backgrounds, text, and elements.
    - Ensure the same template, layout, and styling is used for all files.
+   - Before returning the HTML for any file, ensure that it is fully valid HTML, well-formed, and uses the same layout, structure, and Tailwind styling as all other pages.
+   - Do not include any broken tags, missing closing tags, or inconsistent styles.
+   - All generated HTML should render correctly in a browser and look visually consistent across all files.
+
 
 3. Navigation:
    - For each file, generate an internal **table of contents / nav bar** linking to each main section and subsection (<h2>, <h3>) so users can jump directly to any part of the documentation.
