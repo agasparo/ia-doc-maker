@@ -43,11 +43,8 @@ Guidelines:
 
 
 3. Navigation:
-   - For each file, generate a **sticky left sidebar** that remains visible when scrolling the page.
-   - The sidebar should contain a **table of contents** linking to each main section and subsection (<h2>, <h3>).
-   - Links must be fully functional and maintain correct relative paths, even for files nested in subfolders.
-   - The sidebar should be styled consistently using Tailwind CSS classes, with proper spacing, clear hierarchy, and good contrast.
-   - Ensure the sidebar is responsive and does not overlap main content on different screen sizes.
+   - For each file, generate an internal **table of contents / nav bar** linking to each main section and subsection (<h2>, <h3>) so users can jump directly to any part of the documentation.
+   - Links should be functional and maintain relative paths if nested in folders.
 
 4. Examples:
    - Provide multiple practical examples per function/class when relevant.
