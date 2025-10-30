@@ -35573,9 +35573,7 @@ Here is the code:
 const SUPPORTED_EXTENSIONS = [".js", ".ts", ".py", ".php"];
 const OUTPUT_DIR = external_path_.join(process.cwd(), "docs");
 
-/**
- * Récupère tous les fichiers de code dans un dossier (récursif)
- */
+/** Récupère tous les fichiers de code dans un dossier (récursif) */
 function getAllCodeFiles(dir) {
   const entries = external_fs_.readdirSync(dir, { withFileTypes: true });
   const files = [];
@@ -35588,16 +35586,12 @@ function getAllCodeFiles(dir) {
       files.push(fullPath);
     }
   }
-
   return files;
 }
 
-/**
- * Demande à OpenAI de générer la documentation HTML pour un fichier
- */
+/** Génère la doc HTML pour un fichier via OpenAI */
 async function generateDocForFile(client, code) {
   const input = `${PROMPT}\n${code}`;
-
   const response = await client.responses.create({
     model: MODEL,
     input: [
@@ -35607,42 +35601,42 @@ async function generateDocForFile(client, code) {
       },
     ],
   });
-
-  return response.output_text || response.output[0]?.content[0]?.text || "";
+  return response.output_text || response.output?.[0]?.content?.[0]?.text || "";
 }
 
-/**
- * Gabarit HTML (avec Tailwind CSS)
- */
+/** Template HTML avec Tailwind CDN */
 function wrapInTemplate(title, bodyContent) {
   return `
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${title}</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
-  </head>
-  <body class="bg-gray-50 text-gray-900">
-    <div class="max-w-5xl mx-auto py-10 px-6">
-      <header class="mb-10">
-        <h1 class="text-4xl font-bold text-blue-700 mb-2">${title}</h1>
-        <p class="text-gray-600">Automatically generated documentation</p>
-        <hr class="mt-4 border-gray-300" />
-      </header>
-      <main class="prose max-w-none">${bodyContent}</main>
-    </div>
-  </body>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>${title}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+<div class="max-w-5xl mx-auto py-10 px-6">
+<header class="mb-10">
+<h1 class="text-4xl font-bold text-blue-700 mb-2">${title}</h1>
+<p class="text-gray-600">Automatically generated documentation</p>
+<hr class="mt-4 border-gray-300"/>
+</header>
+<main class="prose max-w-none">${bodyContent}</main>
+</div>
+</body>
 </html>
-  `;
+`;
 }
 
-/**
- * Génère la page d’index regroupant les catégories et fichiers
- */
-function generateIndexPage(structure) {
-  let content = `<h1 class="text-4xl font-bold mb-6">Project Documentation</h1><ul>`;
+/** Génère l'index principal avec description globale */
+function generateIndexPage(structure, projectDescription = "") {
+  let content = `
+    <h1 class="text-4xl font-bold mb-6">Project Documentation</h1>
+    ${projectDescription ? `<p class="mb-6">${projectDescription}</p>` : ""}
+    <ul>
+  `;
+
   for (const [category, files] of Object.entries(structure)) {
     content += `<li><h2 class="text-2xl font-semibold mt-6 mb-2">${category}</h2><ul class="ml-4 list-disc">`;
     for (const file of files) {
@@ -35656,9 +35650,7 @@ function generateIndexPage(structure) {
   return wrapInTemplate("Documentation Index", content);
 }
 
-/**
- * Fonction principale
- */
+/** Fonction principale */
 async function run() {
   try {
     const openaiApiKey = core.getInput("openai_api_key", { required: true });
@@ -35675,6 +35667,7 @@ async function run() {
 
     const structure = {};
 
+    // Générer la doc pour chaque fichier
     for (const file of codeFiles) {
       const relativePath = external_path_.relative(targetPath, file);
       const category = external_path_.dirname(relativePath) || "root";
@@ -35695,8 +35688,15 @@ async function run() {
       structure[category].push(file);
     }
 
-    // Génère l'index principal
-    const indexHTML = generateIndexPage(structure);
+    // Génération de la description globale du projet
+    const allCode = codeFiles.map(file => external_fs_.readFileSync(file, "utf-8")).join("\n\n");
+    const globalDescription = await generateDocForFile(
+      client,
+      `Generate a concise, professional project overview for the following code:\n\n${allCode}`
+    );
+
+    // Génération de l'index principal
+    const indexHTML = generateIndexPage(structure, globalDescription);
     external_fs_.writeFileSync(external_path_.join(OUTPUT_DIR, "index.html"), indexHTML, "utf-8");
 
     core.info(`Documentation generated successfully in ${OUTPUT_DIR}`);
