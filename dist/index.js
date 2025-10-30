@@ -35532,32 +35532,50 @@ Do not summarize or write any extra comments outside of the required sections.
 
 Guidelines:
 
-1. **HTML output only**: Do NOT include Markdown or any plain text outside HTML. All sections must use HTML tags.
-2. **Consistent structure for all files**:
+1. HTML output only: Do NOT include Markdown, plain text outside HTML, or code fences.
+2. Consistent structure for all files:
    - Title / File Name as <h1>
    - Project description or module overview
    - Features and functionality
    - Installation instructions (if applicable)
    - Configuration or setup (if applicable)
-   - Usage examples with **realistic, executable code snippets**
+   - Usage examples with realistic, executable code snippets
    - Detailed inline explanations for functions/classes (parameters, return values, side effects)
    - Optional notes for complex logic or algorithms, explained clearly
-3. **Examples**:
-   - Provide multiple practical examples per function/class when relevant
-   - Examples must be valid code in the same language as the file
-   - Include one end-to-end example showing how the file/module can be used in a real scenario
-4. **Syntax highlighting**: Use proper HTML code blocks (<pre><code class="language-XXX">) for all code snippets
-5. **Style**:
-   - Clean, modern, readable, professional
+   - All code blocks (<pre><code>) should resemble real IDE syntax highlighting (use Tailwind classes like bg-gray-900, text-green-400, text-blue-400, text-yellow-400, etc.)
+   - Do NOT generate inline CSS or <style> tags
+   - Use Tailwind CSS classes for all styling; do NOT generate <style> or <link> tags (except for Tailwind CDN in the template)
+   - Use a palette of gray tones for backgrounds, text, and elements
+   - Keep a clean, modern, readable, professional layout
    - Use consistent headings (<h1>–<h3>), paragraphs, lists
-   - Same style template for all files
-   - Avoid any license, contribution, or generic closing sections
-6. **Clarity and completeness**:
+   - Avoid license, contribution, or generic closing sections
+   - Output must be valid HTML only
+3. Examples:
+   - Provide multiple practical examples per function/class when relevant
+   - Include one end-to-end example showing how the file/module can be used in a real scenario
+   - Examples must be valid code in the same language as the file
+4. Syntax highlighting:
+   - Use proper HTML code blocks (<pre><code class="language-XXX">) for all code snippets
+   - Include realistic IDE-like highlighting using Tailwind classes
+5. Style:
+   - Clean, modern, readable, professional
+   - Consistent headings, paragraphs, lists
+   - Ensure accessible colors and good contrast
+   - Avoid license, contribution, or generic closing sections
+6. Clarity and completeness:
    - Explain complex code and logic clearly
    - Document edge cases, error handling, and important side effects
+   - Include tips or best practices where relevant
    - Target intermediate to advanced developers
-7. **Automatic language detection**: Adapt examples, syntax, and docstrings/comments to the correct programming language (JS, TS, Python, PHP)
-8. **Self-contained HTML**: The generated HTML should be directly viewable in a browser without additional processing.
+7. Automatic language detection:
+   - Adapt examples, syntax, and docstrings/comments to the correct programming language (JS, TS, Python, PHP, ...)
+8. Self-contained HTML:
+   - Generated HTML should be directly viewable in a browser without additional processing
+   - Ensure consistent layout, padding, margins, and responsive design using Tailwind classes
+9. Behavior:
+   - End each page naturally without generic summaries
+   - Do not include extra text outside the required sections
+   - Focus on professional documentation with examples that a developer could copy-paste and run
 
 Here is the code:
 
@@ -35604,8 +35622,23 @@ async function generateDocForFile(client, code) {
   return response.output_text || response.output?.[0]?.content?.[0]?.text || "";
 }
 
-/** Template HTML avec Tailwind CDN */
-function wrapInTemplate(title, bodyContent) {
+/** Template HTML avec sidebar et palette grise */
+function wrapInTemplate(title, bodyContent, structure) {
+  const sidebarLinks = Object.entries(structure)
+    .map(([category, files]) => {
+      const links = files.map(file => {
+        const fileName = external_path_.basename(file, external_path_.extname(file));
+        return `<li class="mb-1"><a href="../${category}/${fileName}.html" class="text-gray-700 hover:text-blue-600">${fileName}</a></li>`;
+      }).join("\n");
+      return `
+        <div class="mb-4">
+          <h2 class="font-semibold text-gray-800 mb-2">${category}</h2>
+          <ul class="ml-2">${links}</ul>
+        </div>
+      `;
+    })
+    .join("\n");
+
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -35615,39 +35648,30 @@ function wrapInTemplate(title, bodyContent) {
 <title>${title}</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 text-gray-900">
-<div class="max-w-5xl mx-auto py-10 px-6">
-<header class="mb-10">
-<h1 class="text-4xl font-bold text-blue-700 mb-2">${title}</h1>
-<p class="text-gray-600">Automatically generated documentation</p>
-<hr class="mt-4 border-gray-300"/>
-</header>
-<main class="prose max-w-none">${bodyContent}</main>
+<body class="bg-gray-100 text-gray-900 font-sans">
+<div class="flex min-h-screen">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gray-200 p-6 flex flex-col">
+    <div class="flex items-center mb-8">
+      <img src="logo.png" alt="Logo" class="w-10 h-10 mr-2"/>
+      <span class="text-xl font-bold text-gray-800">Documentation</span>
+    </div>
+    <nav class="flex-1 overflow-y-auto">
+      ${sidebarLinks}
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-8 overflow-auto">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">${title}</h1>
+    <div class="prose max-w-none bg-white p-6 rounded shadow">
+      ${bodyContent}
+    </div>
+  </main>
 </div>
 </body>
 </html>
 `;
-}
-
-/** Génère l'index principal avec description globale */
-function generateIndexPage(structure, projectDescription = "") {
-  let content = `
-    <h1 class="text-4xl font-bold mb-6">Project Documentation</h1>
-    ${projectDescription ? `<p class="mb-6">${projectDescription}</p>` : ""}
-    <ul>
-  `;
-
-  for (const [category, files] of Object.entries(structure)) {
-    content += `<li><h2 class="text-2xl font-semibold mt-6 mb-2">${category}</h2><ul class="ml-4 list-disc">`;
-    for (const file of files) {
-      const fileName = external_path_.basename(file, external_path_.extname(file));
-      content += `<li><a href="${category}/${fileName}.html" class="text-blue-600 hover:underline">${fileName}</a></li>`;
-    }
-    content += `</ul></li>`;
-  }
-  content += `</ul>`;
-
-  return wrapInTemplate("Documentation Index", content);
 }
 
 /** Fonction principale */
@@ -35667,39 +35691,32 @@ async function run() {
 
     const structure = {};
 
-    // Générer la doc pour chaque fichier
+    // Crée la structure des fichiers par catégorie
     for (const file of codeFiles) {
       const relativePath = external_path_.relative(targetPath, file);
       const category = external_path_.dirname(relativePath) || "root";
-      const fileName = external_path_.basename(file, external_path_.extname(file));
 
       if (!structure[category]) structure[category] = [];
-
-      core.info(`Generating documentation for: ${relativePath}`);
-
-      const code = external_fs_.readFileSync(file, "utf-8");
-      const htmlBody = await generateDocForFile(client, code);
-      const fullHTML = wrapInTemplate(fileName, htmlBody);
-
-      const outputDir = external_path_.join(OUTPUT_DIR, category);
-      external_fs_.mkdirSync(outputDir, { recursive: true });
-      external_fs_.writeFileSync(external_path_.join(outputDir, `${fileName}.html`), fullHTML, "utf-8");
-
       structure[category].push(file);
     }
 
-    // Génération de la description globale du projet
-    const allCode = codeFiles.map(file => external_fs_.readFileSync(file, "utf-8")).join("\n\n");
-    const globalDescription = await generateDocForFile(
-      client,
-      `Generate a concise, professional project overview for the following code:\n\n${allCode}`
-    );
+    // Génère la doc pour chaque fichier
+    for (const [category, files] of Object.entries(structure)) {
+      const outputDir = external_path_.join(OUTPUT_DIR, category);
+      external_fs_.mkdirSync(outputDir, { recursive: true });
 
-    // Génération de l'index principal
-    const indexHTML = generateIndexPage(structure, globalDescription);
-    external_fs_.writeFileSync(external_path_.join(OUTPUT_DIR, "index.html"), indexHTML, "utf-8");
+      for (const file of files) {
+        const fileName = external_path_.basename(file, external_path_.extname(file));
+        const code = external_fs_.readFileSync(file, "utf-8");
+        const htmlBody = await generateDocForFile(client, code);
 
-    core.info(`Documentation generated successfully in ${OUTPUT_DIR}`);
+        const fullHTML = wrapInTemplate(fileName, htmlBody, structure);
+        external_fs_.writeFileSync(external_path_.join(outputDir, `${fileName}.html`), fullHTML, "utf-8");
+        core.info(`Generated doc for ${file}`);
+      }
+    }
+
+    core.info(`All documentation generated successfully in ${OUTPUT_DIR}`);
   } catch (error) {
     core.setFailed(`Failed to generate documentation: ${error.message}`);
   }

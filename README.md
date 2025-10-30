@@ -2,7 +2,7 @@
 
 [![GitHub Workflow Status](https://img.shields.io/badge/status-ready-blue)](#)
 
-GitHub Action to automatically generate **professional HTML documentation** for your code using OpenAI GPT models. This action is fully reusable in any repository and allows users to provide their own OpenAI API key.
+GitHub Action to automatically generate **professional HTML documentation** for your code using OpenAI GPT models. This action is fully reusable in any repository and allows users to provide their own OpenAI API key
 
 ---
 
@@ -66,6 +66,10 @@ jobs:
 
 ## Notes
 
-* Each file’s documentation includes description, features, configuration, usage examples, and detailed inline explanations.
-* Subfolders in your code project become **categories** in the documentation.
-* The action is designed to evolve — feedback and feature requests are welcome.
+* Each file’s documentation includes description, features, configuration, usage examples, and detailed inline explanations
+* Subfolders in your code project become **categories** in the documentation
+* The action is designed to evolve — feedback and feature requests are welcome
+
+---
+
+## Images

@@ -38,8 +38,23 @@ async function generateDocForFile(client, code) {
   return response.output_text || response.output?.[0]?.content?.[0]?.text || "";
 }
 
-/** Template HTML avec Tailwind CDN */
-function wrapInTemplate(title, bodyContent) {
+/** Template HTML avec sidebar et palette grise */
+function wrapInTemplate(title, bodyContent, structure) {
+  const sidebarLinks = Object.entries(structure)
+    .map(([category, files]) => {
+      const links = files.map(file => {
+        const fileName = path.basename(file, path.extname(file));
+        return `<li class="mb-1"><a href="../${category}/${fileName}.html" class="text-gray-700 hover:text-blue-600">${fileName}</a></li>`;
+      }).join("\n");
+      return `
+        <div class="mb-4">
+          <h2 class="font-semibold text-gray-800 mb-2">${category}</h2>
+          <ul class="ml-2">${links}</ul>
+        </div>
+      `;
+    })
+    .join("\n");
+
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -49,39 +64,30 @@ function wrapInTemplate(title, bodyContent) {
 <title>${title}</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 text-gray-900">
-<div class="max-w-5xl mx-auto py-10 px-6">
-<header class="mb-10">
-<h1 class="text-4xl font-bold text-blue-700 mb-2">${title}</h1>
-<p class="text-gray-600">Automatically generated documentation</p>
-<hr class="mt-4 border-gray-300"/>
-</header>
-<main class="prose max-w-none">${bodyContent}</main>
+<body class="bg-gray-100 text-gray-900 font-sans">
+<div class="flex min-h-screen">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gray-200 p-6 flex flex-col">
+    <div class="flex items-center mb-8">
+      <img src="logo.png" alt="Logo" class="w-10 h-10 mr-2"/>
+      <span class="text-xl font-bold text-gray-800">Documentation</span>
+    </div>
+    <nav class="flex-1 overflow-y-auto">
+      ${sidebarLinks}
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-8 overflow-auto">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">${title}</h1>
+    <div class="prose max-w-none bg-white p-6 rounded shadow">
+      ${bodyContent}
+    </div>
+  </main>
 </div>
 </body>
 </html>
 `;
-}
-
-/** Génère l'index principal avec description globale */
-function generateIndexPage(structure, projectDescription = "") {
-  let content = `
-    <h1 class="text-4xl font-bold mb-6">Project Documentation</h1>
-    ${projectDescription ? `<p class="mb-6">${projectDescription}</p>` : ""}
-    <ul>
-  `;
-
-  for (const [category, files] of Object.entries(structure)) {
-    content += `<li><h2 class="text-2xl font-semibold mt-6 mb-2">${category}</h2><ul class="ml-4 list-disc">`;
-    for (const file of files) {
-      const fileName = path.basename(file, path.extname(file));
-      content += `<li><a href="${category}/${fileName}.html" class="text-blue-600 hover:underline">${fileName}</a></li>`;
-    }
-    content += `</ul></li>`;
-  }
-  content += `</ul>`;
-
-  return wrapInTemplate("Documentation Index", content);
 }
 
 /** Fonction principale */
@@ -101,39 +107,32 @@ async function run() {
 
     const structure = {};
 
-    // Générer la doc pour chaque fichier
+    // Crée la structure des fichiers par catégorie
     for (const file of codeFiles) {
       const relativePath = path.relative(targetPath, file);
       const category = path.dirname(relativePath) || "root";
-      const fileName = path.basename(file, path.extname(file));
 
       if (!structure[category]) structure[category] = [];
-
-      core.info(`Generating documentation for: ${relativePath}`);
-
-      const code = fs.readFileSync(file, "utf-8");
-      const htmlBody = await generateDocForFile(client, code);
-      const fullHTML = wrapInTemplate(fileName, htmlBody);
-
-      const outputDir = path.join(OUTPUT_DIR, category);
-      fs.mkdirSync(outputDir, { recursive: true });
-      fs.writeFileSync(path.join(outputDir, `${fileName}.html`), fullHTML, "utf-8");
-
       structure[category].push(file);
     }
 
-    // Génération de la description globale du projet
-    const allCode = codeFiles.map(file => fs.readFileSync(file, "utf-8")).join("\n\n");
-    const globalDescription = await generateDocForFile(
-      client,
-      `Generate a concise, professional project overview for the following code:\n\n${allCode}`
-    );
+    // Génère la doc pour chaque fichier
+    for (const [category, files] of Object.entries(structure)) {
+      const outputDir = path.join(OUTPUT_DIR, category);
+      fs.mkdirSync(outputDir, { recursive: true });
 
-    // Génération de l'index principal
-    const indexHTML = generateIndexPage(structure, globalDescription);
-    fs.writeFileSync(path.join(OUTPUT_DIR, "index.html"), indexHTML, "utf-8");
+      for (const file of files) {
+        const fileName = path.basename(file, path.extname(file));
+        const code = fs.readFileSync(file, "utf-8");
+        const htmlBody = await generateDocForFile(client, code);
 
-    core.info(`Documentation generated successfully in ${OUTPUT_DIR}`);
+        const fullHTML = wrapInTemplate(fileName, htmlBody, structure);
+        fs.writeFileSync(path.join(outputDir, `${fileName}.html`), fullHTML, "utf-8");
+        core.info(`Generated doc for ${file}`);
+      }
+    }
+
+    core.info(`All documentation generated successfully in ${OUTPUT_DIR}`);
   } catch (error) {
     core.setFailed(`Failed to generate documentation: ${error.message}`);
   }
