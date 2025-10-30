@@ -40,20 +40,23 @@ async function generateDocForFile(client, code) {
 
 /** Template HTML avec sidebar et palette grise */
 function wrapInTemplate(title, bodyContent, structure) {
-  const sidebarLinks = Object.entries(structure)
-    .map(([category, files]) => {
-      const links = files.map(file => {
-        const fileName = path.basename(file, path.extname(file));
-        return `<li class="mb-1"><a href="../${category}/${fileName}.html" class="text-gray-700 hover:text-blue-600">${fileName}</a></li>`;
-      }).join("\n");
-      return `
-        <div class="mb-4">
-          <h2 class="font-semibold text-gray-800 mb-2">${category}</h2>
-          <ul class="ml-2">${links}</ul>
-        </div>
-      `;
-    })
-    .join("\n");
+ const sidebarLinks = Object.entries(structure)
+  .map(([category, files]) => {
+    const links = files.map(file => {
+      const fileName = path.basename(file, path.extname(file));
+      return `<li class="mb-1"><a href="${category}/${fileName}.html" class="text-gray-700 hover:text-blue-600">${fileName}</a></li>`;
+    }).join("\n");
+
+    return `
+      <div class="mb-4">
+        <h3 class="font-semibold text-gray-800">${category}</h3>
+        <ul class="ml-4 list-disc">
+          ${links}
+        </ul>
+      </div>
+    `;
+  })
+  .join("\n");
 
   return `
 <!DOCTYPE html>
@@ -69,7 +72,6 @@ function wrapInTemplate(title, bodyContent, structure) {
   <!-- Sidebar -->
   <aside class="w-64 bg-gray-200 p-6 flex flex-col">
     <div class="flex items-center mb-8">
-      <img src="logo.png" alt="Logo" class="w-10 h-10 mr-2"/>
       <span class="text-xl font-bold text-gray-800">Documentation</span>
     </div>
     <nav class="flex-1 overflow-y-auto">

@@ -27,6 +27,7 @@ Guidelines:
    - Keep a clean, modern, readable, professional layout
    - Use consistent headings (<h1>–<h3>), paragraphs, lists
    - Avoid license, contribution, or generic closing sections
+   - The code must appear as it would in a modern IDE (VS Code), with correct colors for keywords, strings, variables, functions, etc.
    - Output must be valid HTML only
 3. Examples:
    - Provide multiple practical examples per function/class when relevant
