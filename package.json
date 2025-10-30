@@ -1,6 +1,6 @@
 {
   "name": "generate-ia-docs",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "GitHub Action to automatically generate professional code documentation and README using OpenAI GPT models",
   "main": "index.js",
   "scripts": {

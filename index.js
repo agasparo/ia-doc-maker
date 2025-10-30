@@ -1,74 +1,93 @@
-import fs from "fs";
-import path from "node:path";
 import core from "@actions/core";
+import fs from "fs";
+import path from "path";
 import OpenAI from "openai";
-import {MODEL, ROLE, PROMPT} from './constant/chatGpt.js';
-import {RESPONSE_FILE, ALLOWED_FILE_EXTENSION} from './constant/file.js';
+import { MODEL, PROMPT, ROLE } from "./chatGpt.js";
+
+const SUPPORTED_EXTENSIONS = [".js", ".ts", ".py", ".php"];
+const OUTPUT_DIR = path.join(process.cwd(), "docs");
 
 /**
- * Récupère les inputs de l'action GitHub
- * @returns {{ apiKey: string, codePath: string }}
+ * Récupère tous les fichiers de code dans un dossier (récursif)
  */
-function getInputs() {
-  const apiKey = core.getInput("openai_api_key", { required: true });
-  const codePath = core.getInput("path", { required: true });
-  return { apiKey, codePath };
-}
-
-/**
- * Lit récursivement un dossier et concatène le contenu des fichiers autorisés
- * @param {string} dir - Chemin du dossier à lire
- * @returns {string} Contenu concaténé des fichiers
- */
-function readDirRecursively(dir) {
-  let codeContent = "";
+function getAllCodeFiles(dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const files = [];
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
-
     if (entry.isDirectory()) {
-      codeContent += readDirRecursively(fullPath);
-    } else if (entry.isFile()) {
-      const ext = path.extname(entry.name);
-      if (ALLOWED_FILE_EXTENSION.includes(ext)) {
-        try {
-          const fileData = fs.readFileSync(fullPath, "utf-8");
-          codeContent += `# File: ${path.relative(process.cwd(), fullPath)}\n${fileData}\n\n`;
-        } catch (err) {
-          core.warning(`Failed to read file ${fullPath}: ${err.message}`);
-        }
-      }
+      files.push(...getAllCodeFiles(fullPath));
+    } else if (SUPPORTED_EXTENSIONS.includes(path.extname(entry.name))) {
+      files.push(fullPath);
     }
   }
 
-  return codeContent;
+  return files;
 }
 
 /**
- * Génère la documentation avec OpenAI
- * @param {string} apiKey - Clé API OpenAI
- * @param {string} codeContent - Contenu du code à documenter
- * @returns {Promise<string>} Documentation générée
+ * Demande à OpenAI de générer la documentation HTML pour un fichier
  */
-async function generateDocumentation(apiKey, codeContent) {
-  const openai = new OpenAI({ apiKey });
-  const completion = await openai.chat.completions.create({
+async function generateDocForFile(client, code) {
+  const input = `${PROMPT}\n${code}`;
+
+  const response = await client.responses.create({
     model: MODEL,
-    messages: [{ role: ROLE, content: `${PROMPT}\n\n${codeContent}` }],
+    input: [
+      {
+        role: ROLE,
+        content: input,
+      },
+    ],
   });
 
-  return completion.choices[0].message.content;
+  return response.output_text || response.output[0]?.content[0]?.text || "";
 }
 
 /**
- * Écrit la documentation dans un fichier
- * @param {string} content - Contenu à écrire
- * @param {string} fileName - Nom du fichier de sortie
+ * Gabarit HTML (avec Tailwind CSS)
  */
-function writeDocumentation(content, fileName = RESPONSE_FILE) {
-  fs.writeFileSync(path.join(process.cwd(), fileName), content);
-  core.info(`${fileName} created successfully.`);
+function wrapInTemplate(title, bodyContent) {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${title}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <div class="max-w-5xl mx-auto py-10 px-6">
+      <header class="mb-10">
+        <h1 class="text-4xl font-bold text-blue-700 mb-2">${title}</h1>
+        <p class="text-gray-600">Automatically generated documentation</p>
+        <hr class="mt-4 border-gray-300" />
+      </header>
+      <main class="prose max-w-none">${bodyContent}</main>
+    </div>
+  </body>
+</html>
+  `;
+}
+
+/**
+ * Génère la page d’index regroupant les catégories et fichiers
+ */
+function generateIndexPage(structure) {
+  let content = `<h1 class="text-4xl font-bold mb-6">Project Documentation</h1><ul>`;
+  for (const [category, files] of Object.entries(structure)) {
+    content += `<li><h2 class="text-2xl font-semibold mt-6 mb-2">${category}</h2><ul class="ml-4 list-disc">`;
+    for (const file of files) {
+      const fileName = path.basename(file, path.extname(file));
+      content += `<li><a href="${category}/${fileName}.html" class="text-blue-600 hover:underline">${fileName}</a></li>`;
+    }
+    content += `</ul></li>`;
+  }
+  content += `</ul>`;
+
+  return wrapInTemplate("Documentation Index", content);
 }
 
 /**
@@ -76,17 +95,45 @@ function writeDocumentation(content, fileName = RESPONSE_FILE) {
  */
 async function run() {
   try {
-    const { apiKey, codePath } = getInputs();
-    const absPath = path.resolve(process.cwd(), codePath);
-    const codeContent = readDirRecursively(absPath);
+    const openaiApiKey = core.getInput("openai_api_key", { required: true });
+    const targetPath = core.getInput("path", { required: true });
 
-    if (!codeContent) {
+    const client = new OpenAI({ apiKey: openaiApiKey });
+    core.info(`Scanning code folder: ${targetPath}`);
+
+    const codeFiles = getAllCodeFiles(targetPath);
+    if (!codeFiles.length) {
       core.warning("No code files found to document.");
       return;
     }
 
-    const documentation = await generateDocumentation(apiKey, codeContent);
-    writeDocumentation(documentation);
+    const structure = {};
+
+    for (const file of codeFiles) {
+      const relativePath = path.relative(targetPath, file);
+      const category = path.dirname(relativePath) || "root";
+      const fileName = path.basename(file, path.extname(file));
+
+      if (!structure[category]) structure[category] = [];
+
+      core.info(`Generating documentation for: ${relativePath}`);
+
+      const code = fs.readFileSync(file, "utf-8");
+      const htmlBody = await generateDocForFile(client, code);
+      const fullHTML = wrapInTemplate(fileName, htmlBody);
+
+      const outputDir = path.join(OUTPUT_DIR, category);
+      fs.mkdirSync(outputDir, { recursive: true });
+      fs.writeFileSync(path.join(outputDir, `${fileName}.html`), fullHTML, "utf-8");
+
+      structure[category].push(file);
+    }
+
+    // Génère l'index principal
+    const indexHTML = generateIndexPage(structure);
+    fs.writeFileSync(path.join(OUTPUT_DIR, "index.html"), indexHTML, "utf-8");
+
+    core.info(`Documentation generated successfully in ${OUTPUT_DIR}`);
   } catch (error) {
     core.setFailed(`Failed to generate documentation: ${error.message}`);
   }

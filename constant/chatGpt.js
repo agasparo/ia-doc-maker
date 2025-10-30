@@ -8,29 +8,34 @@ Important: Do NOT add any generic concluding sentence at the end of the README.
 End the README naturally after the last section (License, Contribution, or Dependencies if present). 
 Do not summarize or write any extra comments outside of the required sections.
 
-Requirements:
+Guidelines:
 
-1. README.md (mandatory):
-   - Project title (mandatory): A concise, descriptive title.
-   - Project description (mandatory): Brief explanation of the purpose and functionality of the code.
-   - Installation instructions (optional): Include only if the code requires installation or dependencies; explain step-by-step how to set up the project.
-   - Usage examples (mandatory): Include clear code snippets showing how to use the main functions or features.
-   - Features and functionality (mandatory): List key functionalities and what the code can do.
-   - Configuration or setup instructions (optional): Only if there are configurable settings; explain default values and how to modify them.
-   - Dependencies and prerequisites (optional): Only if external libraries or tools are required.
-   - Contribution guidelines (optional): How other developers can contribute (forking, pull requests, code style).
-   - License information (optional): If the project has a license, include it.
-
-2. Inline code documentation (mandatory):
-   - Add clear, professional docstrings or comments for all functions, classes, and modules.
-   - Explain parameters, return values, exceptions, and side effects.
-   - Include usage examples in docstrings where appropriate.
-   - Use consistent formatting, professional language, and follow best practices for readability and maintainability.
-
-3. Style:
-   - Tailor explanations for developers with intermediate to advanced knowledge.
-   - Make documentation self-explanatory, concise, and easy to navigate.
-   - Use professional language and consistent formatting throughout.
+1. **HTML output only**: Do NOT include Markdown or any plain text outside HTML. All sections must use HTML tags.
+2. **Consistent structure for all files**:
+   - Title / File Name as <h1>
+   - Project description or module overview
+   - Features and functionality
+   - Installation instructions (if applicable)
+   - Configuration or setup (if applicable)
+   - Usage examples with **realistic, executable code snippets**
+   - Detailed inline explanations for functions/classes (parameters, return values, side effects)
+   - Optional notes for complex logic or algorithms, explained clearly
+3. **Examples**:
+   - Provide multiple practical examples per function/class when relevant
+   - Examples must be valid code in the same language as the file
+   - Include one end-to-end example showing how the file/module can be used in a real scenario
+4. **Syntax highlighting**: Use proper HTML code blocks (<pre><code class="language-XXX">) for all code snippets
+5. **Style**:
+   - Clean, modern, readable, professional
+   - Use consistent headings (<h1>–<h3>), paragraphs, lists
+   - Same style template for all files
+   - Avoid any license, contribution, or generic closing sections
+6. **Clarity and completeness**:
+   - Explain complex code and logic clearly
+   - Document edge cases, error handling, and important side effects
+   - Target intermediate to advanced developers
+7. **Automatic language detection**: Adapt examples, syntax, and docstrings/comments to the correct programming language (JS, TS, Python, PHP)
+8. **Self-contained HTML**: The generated HTML should be directly viewable in a browser without additional processing.
 
 Here is the code:
 
