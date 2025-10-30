@@ -143,25 +143,31 @@ async function run() {
       return;
     }
 
+    // Construit la structure imbriquée
     const structure = {};
 
-    // Construit la structure imbriquée
     for (const file of codeFiles) {
       const relativePath = path.relative(targetPath, file);
       const parts = relativePath.split(path.sep);
-      const fileName = parts.pop(); // Retire le nom du fichier
+      const fileName = parts.pop(); // nom du fichier
       let current = structure;
 
-      // Parcourt les sous-dossiers si présents
-      for (const part of parts) {
-        if (!current[part]) current[part] = {};
-        current = current[part];
-      }
+      if (parts.length === 0) {
+        // Pas de sous-dossier, fichier directement à la racine
+        if (!current.files) current.files = [];
+        current.files.push(fileName);
+      } else {
+        // Parcours les sous-dossiers
+        for (const part of parts) {
+          if (!current[part]) current[part] = {};
+          current = current[part];
+        }
 
-      // Ajoute le fichier au niveau courant
-      if (!current.files) current.files = [];
-      current.files.push(fileName);
+        if (!current.files) current.files = [];
+        current.files.push(fileName);
+      }
     }
+
 
     // Génère la doc pour chaque fichier
     for (const file of codeFiles) {
