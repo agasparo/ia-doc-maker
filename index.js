@@ -149,16 +149,18 @@ async function run() {
     for (const file of codeFiles) {
       const relativePath = path.relative(targetPath, file);
       const parts = relativePath.split(path.sep);
+      const fileName = parts.pop(); // Retire le nom du fichier
       let current = structure;
 
-      for (let i = 0; i < parts.length - 1; i++) {
-        if (!current[parts[i]]) current[parts[i]] = {};
-        current = current[parts[i]];
+      // Parcourt les sous-dossiers si présents
+      for (const part of parts) {
+        if (!current[part]) current[part] = {};
+        current = current[part];
       }
 
-      const category = parts[parts.length - 2] || "root";
-      if (!current[category]) current[category] = [];
-      current[category].push(file);
+      // Ajoute le fichier au niveau courant
+      if (!current.files) current.files = [];
+      current.files.push(fileName);
     }
 
     // Génère la doc pour chaque fichier

@@ -27,7 +27,13 @@ Guidelines:
    - Optional notes for complex logic or algorithms, explained clearly
    - All code blocks (<pre><code>) should resemble real IDE syntax highlighting
    - Every <pre><code> block must include Tailwind CSS classes explicitly on both <pre> and <code> tags.
-   Example: <pre class="p-4 rounded"><code class="language-js text-sm">...</code></pre>
+   Example:
+     <pre class="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto whitespace-pre text-sm my-6 border border-gray-700 shadow-inner">
+       <code class="language-js text-blue-400">...</code>
+     </pre>
+   - This exact pattern must be used for **every** code snippet in all files — no omission allowed.
+   - Never produce a <pre> or <code> tag without Tailwind styling.
+   - If the model generates a code block without Tailwind CSS classes, regenerate that block so it visually matches all others.
    - Do NOT omit any styling for code blocks. All code blocks should consistently use these classes for background, padding, rounded corners, and syntax colors.
    - Ensure long lines of code never overflow outside the viewport (use Tailwind utilities like overflow-x-auto, whitespace-pre, and break-words where needed).
    - All <pre><code> blocks across all files must look identical, with same Tailwind classes, padding, font size, and background, regardless of the file or language.

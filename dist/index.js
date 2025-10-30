@@ -35549,7 +35549,13 @@ Guidelines:
    - Optional notes for complex logic or algorithms, explained clearly
    - All code blocks (<pre><code>) should resemble real IDE syntax highlighting
    - Every <pre><code> block must include Tailwind CSS classes explicitly on both <pre> and <code> tags.
-   Example: <pre class="p-4 rounded"><code class="language-js text-sm">...</code></pre>
+   Example:
+     <pre class="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto whitespace-pre text-sm my-6 border border-gray-700 shadow-inner">
+       <code class="language-js text-blue-400">...</code>
+     </pre>
+   - This exact pattern must be used for **every** code snippet in all files — no omission allowed.
+   - Never produce a <pre> or <code> tag without Tailwind styling.
+   - If the model generates a code block without Tailwind CSS classes, regenerate that block so it visually matches all others.
    - Do NOT omit any styling for code blocks. All code blocks should consistently use these classes for background, padding, rounded corners, and syntax colors.
    - Ensure long lines of code never overflow outside the viewport (use Tailwind utilities like overflow-x-auto, whitespace-pre, and break-words where needed).
    - All <pre><code> blocks across all files must look identical, with same Tailwind classes, padding, font size, and background, regardless of the file or language.
@@ -35766,16 +35772,18 @@ async function run() {
     for (const file of codeFiles) {
       const relativePath = external_path_.relative(targetPath, file);
       const parts = relativePath.split(external_path_.sep);
+      const fileName = parts.pop(); // Retire le nom du fichier
       let current = structure;
 
-      for (let i = 0; i < parts.length - 1; i++) {
-        if (!current[parts[i]]) current[parts[i]] = {};
-        current = current[parts[i]];
+      // Parcourt les sous-dossiers si présents
+      for (const part of parts) {
+        if (!current[part]) current[part] = {};
+        current = current[part];
       }
 
-      const category = parts[parts.length - 2] || "root";
-      if (!current[category]) current[category] = [];
-      current[category].push(file);
+      // Ajoute le fichier au niveau courant
+      if (!current.files) current.files = [];
+      current.files.push(fileName);
     }
 
     // Génère la doc pour chaque fichier
