@@ -89,9 +89,6 @@ function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
     <!-- Sidebar -->
     <aside class="fixed inset-y-0 left-0 w-72 p-6 border-r border-white/30 bg-white/40 backdrop-blur-xl shadow-lg flex flex-col">
       <div class="flex items-center mb-10">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
-             alt="Logo"
-             class="w-9 h-9 mr-3 opacity-90 drop-shadow-md" />
         <span class="text-2xl font-semibold text-gray-900/90 tracking-tight">AI Docs</span>
       </div>
 
@@ -143,31 +140,25 @@ async function run() {
       return;
     }
 
-    // Construit la structure imbriquée
     const structure = {};
 
+    // Construit la structure imbriquée
     for (const file of codeFiles) {
       const relativePath = path.relative(targetPath, file);
       const parts = relativePath.split(path.sep);
-      const fileName = parts.pop(); // nom du fichier
+      const fileName = parts.pop(); // Retire le nom du fichier
       let current = structure;
 
-      if (parts.length === 0) {
-        // Pas de sous-dossier, fichier directement à la racine
-        if (!current.files) current.files = [];
-        current.files.push(fileName);
-      } else {
-        // Parcours les sous-dossiers
-        for (const part of parts) {
-          if (!current[part]) current[part] = {};
-          current = current[part];
-        }
-
-        if (!current.files) current.files = [];
-        current.files.push(fileName);
+      // Parcourt les sous-dossiers si présents
+      for (const part of parts) {
+        if (!current[part]) current[part] = {};
+        current = current[part];
       }
-    }
 
+      // Ajoute le fichier au niveau courant
+      if (!current.files) current.files = [];
+      current.files.push(fileName);
+    }
 
     // Génère la doc pour chaque fichier
     for (const file of codeFiles) {

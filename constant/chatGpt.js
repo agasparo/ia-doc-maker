@@ -15,10 +15,6 @@ Guidelines:
    - DO NOT use triple backticks (html) or any Markdown-style code fences to encapsulate the HTML.
    - Output must be valid, self-contained HTML directly viewable in a browser.
    - DO NOT use \`\`\`html \`\`\` to enclose final html
-   - DO NOT include <html>, <head>, <body>, <meta>, <title>, or <script> tags in the output.
-   - DO NOT insert Tailwind classes or any CSS on the outermost <div> that wraps the content.
-   - All Tailwind styling should only be applied to inner elements (headings, paragraphs, <pre><code>, lists, sections, etc.).
-   - The generated HTML should be a clean snippet that can be embedded inside a page that already includes Tailwind.
 
 
 2. Consistent structure for all files:
@@ -52,7 +48,10 @@ Guidelines:
    - Before returning the HTML for any file, ensure that it is fully valid HTML, well-formed, and uses the same layout, structure, and Tailwind styling as all other pages.
    - Do not include any broken tags, missing closing tags, or inconsistent styles.
    - All generated HTML should render correctly in a browser and look visually consistent across all files.
-
+   - DO NOT include <html>, <head>, <body>, <meta>, <title>, or <script> tags in the output.
+   - DO NOT insert Tailwind classes or any CSS on the outermost <div> that wraps the content.
+   - All Tailwind styling should only be applied to inner elements (headings, paragraphs, <pre><code>, lists, sections, etc.).
+   - The generated HTML should be a clean snippet that can be embedded inside a page that already includes Tailwind.
 
 3. Navigation:
    - For each file, generate an internal **table of contents / nav bar** linking to each main section and subsection (<h2>, <h3>) so users can jump directly to any part of the documentation.
