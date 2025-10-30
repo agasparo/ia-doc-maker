@@ -2,7 +2,7 @@ import core from "@actions/core";
 import fs from "fs";
 import path from "path";
 import OpenAI from "openai";
-import { MODEL, PROMPT, ROLE } from "./chatGpt.js";
+import { MODEL, PROMPT, ROLE } from "./constant/chatGpt.js";
 
 const SUPPORTED_EXTENSIONS = [".js", ".ts", ".py", ".php"];
 const OUTPUT_DIR = path.join(process.cwd(), "docs");
