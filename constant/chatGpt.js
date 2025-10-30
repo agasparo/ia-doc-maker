@@ -20,15 +20,17 @@ Guidelines:
    - Usage examples with realistic, executable code snippets
    - Detailed inline explanations for functions/classes (parameters, return values, side effects)
    - Optional notes for complex logic or algorithms, explained clearly
-   - All code blocks (<pre><code>) should resemble real IDE syntax highlighting (use Tailwind classes like bg-gray-900, text-green-400, text-blue-400, text-yellow-400, etc.)
+   - All code blocks (<pre><code>) must look like real IDE code (as in VS Code) with proper syntax coloring for keywords, strings, functions, variables, comments, and types.
+   - Use Tailwind CSS utility classes only for colors and background (e.g., bg-gray-900 for background, text-green-400 for strings, text-blue-400 for keywords, text-yellow-400 for functions), but do NOT generate any inline <style> tags.
+   - Ensure that the code appearance is consistent across all files and readable, as if viewed in a modern code editor.
    - Do NOT generate inline CSS or <style> tags
    - Use Tailwind CSS classes for all styling; do NOT generate <style> or <link> tags (except for Tailwind CDN in the template)
    - Use a palette of gray tones for backgrounds, text, and elements
    - Keep a clean, modern, readable, professional layout
    - Use consistent headings (<h1>–<h3>), paragraphs, lists
    - Avoid license, contribution, or generic closing sections
-   - The code must appear as it would in a modern IDE (VS Code), with correct colors for keywords, strings, variables, functions, etc.
    - Output must be valid HTML only
+   - DO NOT use triple backticks (\`\`\`html\`\`\`) or any Markdown-style code fences to encapsulate the HTML
 3. Examples:
    - Provide multiple practical examples per function/class when relevant
    - Include one end-to-end example showing how the file/module can be used in a real scenario
