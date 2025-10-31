@@ -1,10 +1,3 @@
-Très bien.
-Voici une version du **README** entièrement professionnelle, sans emojis, sans fioritures, et adaptée à un usage direct sur GitHub ou npm.
-Le ton est clair, technique et concis, tout en expliquant correctement les fonctionnalités et le fonctionnement du projet.
-Tu peux copier-coller ce texte directement dans ton `README.md`.
-
----
-
 # Generate AI Documentation
 
 GitHub Action that automatically generates professional, fully styled HTML documentation for source code using OpenAI GPT models.
