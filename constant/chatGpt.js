@@ -1,103 +1,105 @@
-export const MODEL = "gpt-4o";
+export const MODEL = "gpt-5";
 export const ROLE = "user";
 export const PROMPT = `
 You are an expert technical writer and code documentation specialist. 
-Your task is to generate comprehensive, professional, and clear documentation for the following code.
+Your goal is to generate professional, comprehensive, and visually consistent documentation in **pure HTML**, with Tailwind CSS styling, for the following source code.
 
-Important: Do NOT add any generic concluding sentence at the end of the README. 
-End the README naturally after the last section (License, Contribution, or Dependencies if present). 
-Do not summarize or write any extra comments outside of the required sections.
+Follow these rules *strictly*:
 
-Guidelines:
+---
 
-1. HTML output only: 
-   - Do NOT include Markdown, plain text outside HTML, or code fences.
-   - DO NOT use triple backticks (html) or any Markdown-style code fences to encapsulate the HTML.
-   - Output must be valid, self-contained HTML directly viewable in a browser.
-   - DO NOT use \`\`\`html \`\`\` to enclose final html
+### 1. Output format (EXTREMELY IMPORTANT)
+- Output **HTML only**.
+- Do **NOT** include:
+  - Markdown fences such as \`\`\`, \`\`\`html, or similar.
+  - Any text outside HTML (no summaries, no explanations outside sections).
+  - Any wrapping <html>, <head>, <body>, <meta>, or <title> tags.
+- The final HTML snippet must be **self-contained** and ready to embed in a Tailwind-enabled page.
+- **Never** wrap the entire output in an extra <div> (especially with styling).  
+  The first visible element should be the <h1> title — nothing before it.
 
+---
 
-2. Consistent structure for all files:
-   - Title / File Name as <h1>
-   - Project description or module overview
-   - Features and functionality
-   - Installation instructions (if applicable)
-   - Configuration or setup (if applicable)
-   - Usage examples with realistic, executable code snippets
-   - Detailed inline explanations for functions/classes (parameters, return values, side effects)
-   - Optional notes for complex logic or algorithms, explained clearly
-   - All code blocks (<pre><code>) should resemble real IDE syntax highlighting
-   - Every <pre><code> block must include Tailwind CSS classes explicitly on both <pre> and <code> tags.
-   Example:
-     <pre class="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto whitespace-pre text-sm my-6 border border-gray-700 shadow-inner">
-       <code class="language-js text-blue-400">...</code>
-     </pre>
-   - This exact pattern must be used for **every** code snippet in all files — no omission allowed.
-   - Never produce a <pre> or <code> tag without Tailwind styling.
-   - If the model generates a code block without Tailwind CSS classes, regenerate that block so it visually matches all others.
-   - Do NOT omit any styling for code blocks. All code blocks should consistently use these classes for background, padding, rounded corners, and syntax colors.
-   - Ensure long lines of code never overflow outside the viewport (use Tailwind utilities like overflow-x-auto, whitespace-pre, and break-words where needed).
-   - All <pre><code> blocks across all files must look identical, with same Tailwind classes, padding, font size, and background, regardless of the file or language.
-   - Use Tailwind CSS classes only for styling do NOT generate inline <style> or <link> tags, except for the Tailwind CDN in the template.
-   - Use a palette of gray tones for backgrounds, text, and elements.
-   - Ensure the same template, layout, and styling is used for all files.
-   - Ensure proper spacing, indentation, and layout throughout the HTML.
-   - Use consistent padding, margins, and line spacing to make the content visually clean and easy to read.
-   - Code blocks, headings, lists, and paragraphs should all have appropriate spacing so that the page feels structured and not cluttered.
-   - Maintain a visually appealing hierarchy with headings, subheadings, and section breaks.
-   - Before returning the HTML for any file, ensure that it is fully valid HTML, well-formed, and uses the same layout, structure, and Tailwind styling as all other pages.
-   - Do not include any broken tags, missing closing tags, or inconsistent styles.
-   - All generated HTML should render correctly in a browser and look visually consistent across all files.
-   - DO NOT include <html>, <head>, <body>, <meta>, <title>, or <script> tags in the output.
-   - DO NOT insert Tailwind classes or any CSS on the outermost <div> that wraps the content.
-   - All Tailwind styling should only be applied to inner elements (headings, paragraphs, <pre><code>, lists, sections, etc.).
-   - The generated HTML should be a clean snippet that can be embedded inside a page that already includes Tailwind.
+### 2. Structure and Layout
+Each documentation file must follow this consistent structure:
+1. **Title** (<h1>) — file or module name
+2. **Project or module description**
+3. **Table of contents / Navigation** — list of links pointing to all <h2> and <h3> sections within the same document
+4. **Sections**, in this order if relevant:
+   - Features and Functionality
+   - Installation
+   - Configuration / Setup
+   - Usage Examples
+   - API Reference (functions, classes, parameters, return types)
+   - Notes or Tips (for complex logic)
+   - Dependencies / License (if applicable)
 
-3. Navigation:
-   - For each file, generate an internal **table of contents / nav bar** linking to each main section and subsection (<h2>, <h3>) so users can jump directly to any part of the documentation.
-   - Links should be functional and maintain relative paths if nested in folders.
+---
 
-4. Examples:
-   - Provide multiple practical examples per function/class when relevant.
-   - Include at least one end-to-end example showing how the file/module can be used in a real scenario.
-   - Examples must be valid code in the same language as the file.
+### 3. Tailwind Styling Requirements
+- The design must use a clean, translucent “glassmorphism” aesthetic:
+  - Use utilities like: bg-white/40, backdrop-blur-xl, border border-white/30, shadow-2xl, rounded-3xl, p-10, text-gray-900/90.
+  - Ensure adequate spacing: use mt-8, mb-6, p-4, rounded-xl consistently.
+- Maintain a clear hierarchy:
+  - <h1> large and bold
+  - <h2> and <h3> progressively smaller, spaced with mt-8 mb-4
+- Ensure sections, paragraphs, and code blocks have balanced spacing and readable line heights.
 
-5. Syntax highlighting:
-   - Use <pre><code class="language-XXX"> for all code snippets.
-   - Apply realistic IDE-like highlighting using Tailwind classes.
-   - Ensure code blocks are readable, visually appealing, and resemble what a developer would see in VS Code.
+---
 
-6. Style and design:
-   - Use Tailwind CSS only (no inline CSS, no <style> tags).
-   - Visual style should reflect a clean iOS-like glassmorphism aesthetic:
-     Soft gradients, translucent panels, blur effects, white/gray palette.
-   - Use Tailwind utilities like:
-     bg-white/40, backdrop-blur-xl, border border-white/30, shadow-2xl, rounded-3xl, p-10, text-gray-900/90.
-   - Maintain proper spacing and layout consistency:
-     * Adequate spacing between sections (mt-8, mb-6, etc.)
-     * Structured indentation for readability
-     * Visual hierarchy with consistent <h2>, <h3> styling
-   - Ensure the document feels clean, modern, and readable on desktop and mobile.
+### 4. Code Blocks (Critical Consistency Rule)
+Every code example or snippet must follow **exactly** this structure:
 
-7. Clarity and completeness:
-   - Explain complex code and logic clearly.
-   - Document edge cases, error handling, and important side effects.
-   - Include tips, best practices, and notes where relevant.
-   - Target intermediate to advanced developers.
+<pre class="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto whitespace-pre text-sm my-6 border border-gray-700 shadow-inner">
+  <code class="language-[LANG] text-blue-400">
+    ... code here ...
+  </code>
+</pre>
 
-8. Automatic language detection:
-   - Adapt examples, syntax, and docstrings/comments to the correct programming language (JS, TS, Python, PHP, ...).
+Rules:
+- Use Tailwind classes **exactly** as above — no omissions, no style changes.
+- Replace [LANG] with the correct language identifier (js, ts, py, php, etc.).
+- Code must look realistic, syntax-highlighted, and copy-paste ready.
+- Long lines must not overflow horizontally (thanks to 'overflow-x-auto' and 'whitespace-pre').
+- **Never** output a <pre> or <code> tag without Tailwind classes.
 
-9. Self-contained HTML:
-   - The generated HTML must be directly viewable in a browser without additional processing.
-   - Ensure consistent layout and styling using Tailwind CSS for all sections, code blocks, and navigation elements.
+---
 
-10. Behavior:
-   - End each page naturally without generic summaries.
-   - Do not include extra text outside the required sections.
-   - Focus on professional documentation with examples that a developer could copy-paste and run.
-   - Maintain uniformity across all files and sections for a coherent documentation experience.
+### 5. Navigation
+- Create a clickable table of contents with anchors linking to each <h2> or <h3>.
+- Example:
+  <ul class="list-disc pl-6 space-y-2 text-gray-700">
+    <li><a href="#features" class="text-blue-600 hover:underline">Features</a></li>
+    <li><a href="#usage-examples" class="text-blue-600 hover:underline">Usage Examples</a></li>
+  </ul>
 
-Here is the code:
+---
 
+### 6. Content Guidelines
+- Include clear, concise explanations for each function, class, and parameter.
+- Add **multiple realistic usage examples**, including one end-to-end demonstration.
+- Explain complex logic or algorithms clearly.
+- Describe return values, side effects, and error handling.
+- Target intermediate to advanced developers.
+
+---
+
+### 7. Behavior and Output Termination
+- End naturally after the final section (e.g., License or Dependencies).  
+  Do **NOT** add generic summary lines or “end of file” comments.
+- Never include extra wrapping tags or inline '<style>' blocks.
+- The output must be valid HTML that renders correctly inside a Tailwind environment.
+
+---
+
+### 8. Consistency and Validation
+Before finalizing output:
+- Verify all tags are properly closed.
+- Ensure spacing, indentation, and class names are consistent.
+- Confirm the document starts with <h1> and includes no unwanted wrappers or Markdown fences.
+- Output must be visually and structurally identical across different files.
+
+---
+
+Now generate the documentation for the following source code:
 `;

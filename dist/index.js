@@ -35520,109 +35520,110 @@ const _deployments_endpoints = new Set([
 
 //# sourceMappingURL=index.mjs.map
 ;// CONCATENATED MODULE: ./constant/chatGpt.js
-const MODEL = "gpt-4o";
+const MODEL = "gpt-5";
 const ROLE = "user";
 const PROMPT = `
 You are an expert technical writer and code documentation specialist. 
-Your task is to generate comprehensive, professional, and clear documentation for the following code.
+Your goal is to generate professional, comprehensive, and visually consistent documentation in **pure HTML**, with Tailwind CSS styling, for the following source code.
 
-Important: Do NOT add any generic concluding sentence at the end of the README. 
-End the README naturally after the last section (License, Contribution, or Dependencies if present). 
-Do not summarize or write any extra comments outside of the required sections.
+Follow these rules *strictly*:
 
-Guidelines:
+---
 
-1. HTML output only: 
-   - Do NOT include Markdown, plain text outside HTML, or code fences.
-   - DO NOT use triple backticks (html) or any Markdown-style code fences to encapsulate the HTML.
-   - Output must be valid, self-contained HTML directly viewable in a browser.
-   - DO NOT use \`\`\`html \`\`\` to enclose final html
-   - DO NOT include <html>, <head>, <body>, <meta>, <title>, or <script> tags in the output.
-   - DO NOT insert Tailwind classes or any CSS on the outermost <div> that wraps the content.
-   - All Tailwind styling should only be applied to inner elements (headings, paragraphs, <pre><code>, lists, sections, etc.).
-   - The generated HTML should be a clean snippet that can be embedded inside a page that already includes Tailwind.
+### 1. Output format (EXTREMELY IMPORTANT)
+- Output **HTML only**.
+- Do **NOT** include:
+  - Markdown fences such as \`\`\`, \`\`\`html, or similar.
+  - Any text outside HTML (no summaries, no explanations outside sections).
+  - Any wrapping <html>, <head>, <body>, <meta>, or <title> tags.
+- The final HTML snippet must be **self-contained** and ready to embed in a Tailwind-enabled page.
+- **Never** wrap the entire output in an extra <div> (especially with styling).  
+  The first visible element should be the <h1> title — nothing before it.
 
+---
 
-2. Consistent structure for all files:
-   - Title / File Name as <h1>
-   - Project description or module overview
-   - Features and functionality
-   - Installation instructions (if applicable)
-   - Configuration or setup (if applicable)
-   - Usage examples with realistic, executable code snippets
-   - Detailed inline explanations for functions/classes (parameters, return values, side effects)
-   - Optional notes for complex logic or algorithms, explained clearly
-   - All code blocks (<pre><code>) should resemble real IDE syntax highlighting
-   - Every <pre><code> block must include Tailwind CSS classes explicitly on both <pre> and <code> tags.
-   Example:
-     <pre class="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto whitespace-pre text-sm my-6 border border-gray-700 shadow-inner">
-       <code class="language-js text-blue-400">...</code>
-     </pre>
-   - This exact pattern must be used for **every** code snippet in all files — no omission allowed.
-   - Never produce a <pre> or <code> tag without Tailwind styling.
-   - If the model generates a code block without Tailwind CSS classes, regenerate that block so it visually matches all others.
-   - Do NOT omit any styling for code blocks. All code blocks should consistently use these classes for background, padding, rounded corners, and syntax colors.
-   - Ensure long lines of code never overflow outside the viewport (use Tailwind utilities like overflow-x-auto, whitespace-pre, and break-words where needed).
-   - All <pre><code> blocks across all files must look identical, with same Tailwind classes, padding, font size, and background, regardless of the file or language.
-   - Use Tailwind CSS classes only for styling do NOT generate inline <style> or <link> tags, except for the Tailwind CDN in the template.
-   - Use a palette of gray tones for backgrounds, text, and elements.
-   - Ensure the same template, layout, and styling is used for all files.
-   - Ensure proper spacing, indentation, and layout throughout the HTML.
-   - Use consistent padding, margins, and line spacing to make the content visually clean and easy to read.
-   - Code blocks, headings, lists, and paragraphs should all have appropriate spacing so that the page feels structured and not cluttered.
-   - Maintain a visually appealing hierarchy with headings, subheadings, and section breaks.
-   - Before returning the HTML for any file, ensure that it is fully valid HTML, well-formed, and uses the same layout, structure, and Tailwind styling as all other pages.
-   - Do not include any broken tags, missing closing tags, or inconsistent styles.
-   - All generated HTML should render correctly in a browser and look visually consistent across all files.
+### 2. Structure and Layout
+Each documentation file must follow this consistent structure:
+1. **Title** (<h1>) — file or module name
+2. **Project or module description**
+3. **Table of contents / Navigation** — list of links pointing to all <h2> and <h3> sections within the same document
+4. **Sections**, in this order if relevant:
+   - Features and Functionality
+   - Installation
+   - Configuration / Setup
+   - Usage Examples
+   - API Reference (functions, classes, parameters, return types)
+   - Notes or Tips (for complex logic)
+   - Dependencies / License (if applicable)
 
+---
 
-3. Navigation:
-   - For each file, generate an internal **table of contents / nav bar** linking to each main section and subsection (<h2>, <h3>) so users can jump directly to any part of the documentation.
-   - Links should be functional and maintain relative paths if nested in folders.
+### 3. Tailwind Styling Requirements
+- The design must use a clean, translucent “glassmorphism” aesthetic:
+  - Use utilities like: bg-white/40, backdrop-blur-xl, border border-white/30, shadow-2xl, rounded-3xl, p-10, text-gray-900/90.
+  - Ensure adequate spacing: use mt-8, mb-6, p-4, rounded-xl consistently.
+- Maintain a clear hierarchy:
+  - <h1> large and bold
+  - <h2> and <h3> progressively smaller, spaced with mt-8 mb-4
+- Ensure sections, paragraphs, and code blocks have balanced spacing and readable line heights.
 
-4. Examples:
-   - Provide multiple practical examples per function/class when relevant.
-   - Include at least one end-to-end example showing how the file/module can be used in a real scenario.
-   - Examples must be valid code in the same language as the file.
+---
 
-5. Syntax highlighting:
-   - Use <pre><code class="language-XXX"> for all code snippets.
-   - Apply realistic IDE-like highlighting using Tailwind classes.
-   - Ensure code blocks are readable, visually appealing, and resemble what a developer would see in VS Code.
+### 4. Code Blocks (Critical Consistency Rule)
+Every code example or snippet must follow **exactly** this structure:
 
-6. Style and design:
-   - Use Tailwind CSS only (no inline CSS, no <style> tags).
-   - Visual style should reflect a clean iOS-like glassmorphism aesthetic:
-     Soft gradients, translucent panels, blur effects, white/gray palette.
-   - Use Tailwind utilities like:
-     bg-white/40, backdrop-blur-xl, border border-white/30, shadow-2xl, rounded-3xl, p-10, text-gray-900/90.
-   - Maintain proper spacing and layout consistency:
-     * Adequate spacing between sections (mt-8, mb-6, etc.)
-     * Structured indentation for readability
-     * Visual hierarchy with consistent <h2>, <h3> styling
-   - Ensure the document feels clean, modern, and readable on desktop and mobile.
+<pre class="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto whitespace-pre text-sm my-6 border border-gray-700 shadow-inner">
+  <code class="language-[LANG] text-blue-400">
+    ... code here ...
+  </code>
+</pre>
 
-7. Clarity and completeness:
-   - Explain complex code and logic clearly.
-   - Document edge cases, error handling, and important side effects.
-   - Include tips, best practices, and notes where relevant.
-   - Target intermediate to advanced developers.
+Rules:
+- Use Tailwind classes **exactly** as above — no omissions, no style changes.
+- Replace [LANG] with the correct language identifier (js, ts, py, php, etc.).
+- Code must look realistic, syntax-highlighted, and copy-paste ready.
+- Long lines must not overflow horizontally (thanks to 'overflow-x-auto' and 'whitespace-pre').
+- **Never** output a <pre> or <code> tag without Tailwind classes.
 
-8. Automatic language detection:
-   - Adapt examples, syntax, and docstrings/comments to the correct programming language (JS, TS, Python, PHP, ...).
+---
 
-9. Self-contained HTML:
-   - The generated HTML must be directly viewable in a browser without additional processing.
-   - Ensure consistent layout and styling using Tailwind CSS for all sections, code blocks, and navigation elements.
+### 5. Navigation
+- Create a clickable table of contents with anchors linking to each <h2> or <h3>.
+- Example:
+  <ul class="list-disc pl-6 space-y-2 text-gray-700">
+    <li><a href="#features" class="text-blue-600 hover:underline">Features</a></li>
+    <li><a href="#usage-examples" class="text-blue-600 hover:underline">Usage Examples</a></li>
+  </ul>
 
-10. Behavior:
-   - End each page naturally without generic summaries.
-   - Do not include extra text outside the required sections.
-   - Focus on professional documentation with examples that a developer could copy-paste and run.
-   - Maintain uniformity across all files and sections for a coherent documentation experience.
+---
 
-Here is the code:
+### 6. Content Guidelines
+- Include clear, concise explanations for each function, class, and parameter.
+- Add **multiple realistic usage examples**, including one end-to-end demonstration.
+- Explain complex logic or algorithms clearly.
+- Describe return values, side effects, and error handling.
+- Target intermediate to advanced developers.
 
+---
+
+### 7. Behavior and Output Termination
+- End naturally after the final section (e.g., License or Dependencies).  
+  Do **NOT** add generic summary lines or “end of file” comments.
+- Never include extra wrapping tags or inline '<style>' blocks.
+- The output must be valid HTML that renders correctly inside a Tailwind environment.
+
+---
+
+### 8. Consistency and Validation
+Before finalizing output:
+- Verify all tags are properly closed.
+- Ensure spacing, indentation, and class names are consistent.
+- Confirm the document starts with <h1> and includes no unwanted wrappers or Markdown fences.
+- Output must be visually and structurally identical across different files.
+
+---
+
+Now generate the documentation for the following source code:
 `;
 
 ;// CONCATENATED MODULE: ./index.js
@@ -35632,10 +35633,22 @@ Here is the code:
 
 
 
+/* -------------------------------------------------------------------------- */
+/*                              CONFIGURATION                                 */
+/* -------------------------------------------------------------------------- */
+
 const SUPPORTED_EXTENSIONS = [".js", ".ts", ".py", ".php"];
 const OUTPUT_DIR = external_path_.join(process.cwd(), "docs");
 
-/** Récupère tous les fichiers de code dans un dossier (récursif) */
+/* -------------------------------------------------------------------------- */
+/*                         FONCTIONS UTILITAIRES                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Récupère récursivement tous les fichiers de code pris en charge dans un dossier.
+ * @param {string} dir - Dossier à parcourir
+ * @returns {string[]} Liste complète des fichiers de code
+ */
 function getAllCodeFiles(dir) {
   const entries = external_fs_.readdirSync(dir, { withFileTypes: true });
   const files = [];
@@ -35648,57 +35661,101 @@ function getAllCodeFiles(dir) {
       files.push(fullPath);
     }
   }
+
   return files;
 }
 
-/** Génère la doc HTML pour un fichier via OpenAI */
-async function generateDocForFile(client, code) {
-  const input = `${PROMPT}\n${code}`;
-  const response = await client.responses.create({
-    model: MODEL,
-    input: [
-      {
-        role: ROLE,
-        content: input,
-      },
-    ],
-  });
-  return response.output_text || response.output?.[0]?.content?.[0]?.text || "";
+/**
+ * Construit la structure hiérarchique des dossiers et fichiers à partir d'une liste de chemins.
+ * @param {string[]} files - Liste des fichiers à structurer
+ * @param {string} rootDir - Dossier racine
+ * @returns {object} Structure hiérarchique pour la génération de la sidebar
+ */
+function buildFileStructure(files, rootDir) {
+  const structure = {};
+
+  for (const file of files) {
+    const relativePath = external_path_.relative(rootDir, file);
+    const parts = relativePath.split(external_path_.sep);
+    const fileName = parts.pop();
+    let current = structure;
+
+    for (const part of parts) {
+      if (!current[part]) current[part] = {};
+      current = current[part];
+    }
+
+    if (!current.files) current.files = [];
+    current.files.push(fileName);
+  }
+
+  return structure;
 }
 
-/** Génère les liens de la sidebar avec compatibilité sous-dossiers */
-function generateSidebarLinks(structure, currentFilePath = "") {
-  return Object.entries(structure)
-    .map(([category, files]) => {
-      const links = files
+/**
+ * Formate un nom de fichier en supprimant les extensions et en rendant le nom plus lisible.
+ * @param {string} name - Nom du fichier sans extension
+ * @returns {string} Nom formaté (capitalisé et espacé)
+ */
+function formatFileName(name) {
+  return name
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Génère les liens HTML pour la sidebar (supporte les sous-dossiers récursifs).
+ * @param {object} structure - Structure des fichiers et dossiers
+ * @param {string} currentFilePath - Chemin du fichier courant (ex: "utils/math.html")
+ * @param {string} basePath - Chemin de base relatif courant
+ * @returns {string} HTML de la sidebar
+ */
+function generateSidebarLinks(structure, currentFilePath = "", basePath = "") {
+  let html = "";
+
+  for (const [key, value] of Object.entries(structure)) {
+    if (key === "files") {
+      // Liste des fichiers à ce niveau
+      const links = value
         .map((file) => {
           const fileName = external_path_.basename(file, external_path_.extname(file));
-          const relativePath = external_path_.relative(
-            external_path_.dirname(currentFilePath),
-            external_path_.join(category, `${fileName}.html`)
-          );
+          const relativePath = external_path_.relative(external_path_.dirname(currentFilePath), external_path_.join(basePath, `${fileName}.html`))
+            .replace(/\\/g, "/");
+
           return `
             <li>
               <a href="${relativePath}"
                  class="block px-3 py-1.5 rounded-md text-gray-800/90 hover:text-blue-600 hover:bg-white/40 transition-all duration-200">
-                ${fileName}
+                ${formatFileName(fileName)}
               </a>
             </li>
           `;
         })
         .join("\n");
 
-      return `
+      html += `<ul class="space-y-1">${links}</ul>`;
+    } else if (typeof value === "object") {
+      // Dossier imbriqué
+      html += `
         <div class="mb-5">
-          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-600/80 mb-2">${category}</h3>
-          <ul class="space-y-1">${links}</ul>
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-600/80 mb-2">${key}</h3>
+          ${generateSidebarLinks(value, currentFilePath, external_path_.join(basePath, key))}
         </div>
       `;
-    })
-    .join("\n");
+    }
+  }
+
+  return html;
 }
 
-/** Template HTML avec design iOS-style glassmorphism via Tailwind */
+/**
+ * Génère le squelette HTML complet (page + sidebar + contenu).
+ * @param {string} title - Titre du fichier/document
+ * @param {string} bodyContent - Contenu HTML généré par le modèle
+ * @param {object} structure - Structure des fichiers pour la navigation
+ * @param {string} currentFilePath - Chemin relatif du fichier courant
+ * @returns {string} HTML complet prêt à écrire
+ */
 function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
   const sidebarLinks = generateSidebarLinks(structure, currentFilePath);
 
@@ -35717,9 +35774,6 @@ function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
     <!-- Sidebar -->
     <aside class="fixed inset-y-0 left-0 w-72 p-6 border-r border-white/30 bg-white/40 backdrop-blur-xl shadow-lg flex flex-col">
       <div class="flex items-center mb-10">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
-             alt="Logo"
-             class="w-9 h-9 mr-3 opacity-90 drop-shadow-md" />
         <span class="text-2xl font-semibold text-gray-900/90 tracking-tight">AI Docs</span>
       </div>
 
@@ -35732,7 +35786,6 @@ function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
     <main class="flex-1 ml-72 p-12">
       <div class="bg-white/60 backdrop-blur-xl border border-white/40 rounded-3xl shadow-2xl p-10 max-w-5xl mx-auto">
         <h1 class="text-4xl font-bold mb-8 text-gray-900/90 tracking-tight">${title}</h1>
-
         <div class="prose prose-gray max-w-none text-gray-800 leading-relaxed">
           ${bodyContent}
         </div>
@@ -35741,7 +35794,7 @@ function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
   </div>
 
   <script>
-    // Défilement doux pour les ancres internes
+    // Défilement fluide pour les ancres internes
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener("click", function (e) {
         e.preventDefault();
@@ -35756,14 +35809,34 @@ function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
 `;
 }
 
-/** Fonction principale */
+/**
+ * Appelle l'API OpenAI pour générer la documentation HTML d'un fichier.
+ * @param {OpenAI} client - Instance du client OpenAI
+ * @param {string} code - Contenu du fichier source
+ * @returns {Promise<string>} HTML généré
+ */
+async function generateDocForFile(client, code) {
+  const input = `${PROMPT}\n${code}`;
+
+  const response = await client.responses.create({
+    model: MODEL,
+    input: [{ role: ROLE, content: input }],
+  });
+
+  return response.output_text || response.output?.[0]?.content?.[0]?.text || "";
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                MAIN LOGIC                                  */
+/* -------------------------------------------------------------------------- */
+
 async function run() {
   try {
     const openaiApiKey = core.getInput("openai_api_key", { required: true });
     const targetPath = core.getInput("path", { required: true });
 
     const client = new OpenAI({ apiKey: openaiApiKey });
-    core.info(`Scanning code folder: ${targetPath}`);
+    core.info(`Scanning source folder: ${targetPath}`);
 
     const codeFiles = getAllCodeFiles(targetPath);
     if (!codeFiles.length) {
@@ -35771,33 +35844,8 @@ async function run() {
       return;
     }
 
-    // Construit la structure imbriquée
-    const structure = {};
+    const structure = buildFileStructure(codeFiles, targetPath);
 
-    for (const file of codeFiles) {
-      const relativePath = external_path_.relative(targetPath, file);
-      const parts = relativePath.split(external_path_.sep);
-      const fileName = parts.pop(); // nom du fichier
-      let current = structure;
-
-      if (parts.length === 0) {
-        // Pas de sous-dossier, fichier directement à la racine
-        if (!current.files) current.files = [];
-        current.files.push(fileName);
-      } else {
-        // Parcours les sous-dossiers
-        for (const part of parts) {
-          if (!current[part]) current[part] = {};
-          current = current[part];
-        }
-
-        if (!current.files) current.files = [];
-        current.files.push(fileName);
-      }
-    }
-
-
-    // Génère la doc pour chaque fichier
     for (const file of codeFiles) {
       const relativePath = external_path_.relative(targetPath, file);
       const outputDir = external_path_.join(OUTPUT_DIR, external_path_.dirname(relativePath));
@@ -35805,19 +35853,26 @@ async function run() {
 
       const fileName = external_path_.basename(file, external_path_.extname(file));
       const code = external_fs_.readFileSync(file, "utf-8");
-      const htmlBody = await generateDocForFile(client, code);
-      const currentFilePath = external_path_.join(external_path_.dirname(relativePath), `${fileName}.html`).replace(/\\/g, "/");
 
+      core.info(`Generating documentation for: ${relativePath}`);
+      const htmlBody = await generateDocForFile(client, code);
+
+      const currentFilePath = external_path_.join(external_path_.dirname(relativePath), `${fileName}.html`).replace(/\\/g, "/");
       const fullHTML = wrapInTemplate(fileName, htmlBody, structure, currentFilePath);
+
       external_fs_.writeFileSync(external_path_.join(outputDir, `${fileName}.html`), fullHTML, "utf-8");
-      core.info(`Generated doc for ${relativePath}`);
+      core.info(`Documentation generated for ${relativePath}`);
     }
 
-    core.info(`Documentation generated successfully in ${OUTPUT_DIR}`);
+    core.info(`All documentation generated successfully in: ${OUTPUT_DIR}`);
   } catch (error) {
     core.setFailed(`Failed to generate documentation: ${error.message}`);
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/*                              EXECUTION                                     */
+/* -------------------------------------------------------------------------- */
 
 run();
 

@@ -4,10 +4,22 @@ import path from "path";
 import OpenAI from "openai";
 import { MODEL, PROMPT, ROLE } from "./constant/chatGpt.js";
 
+/* -------------------------------------------------------------------------- */
+/*                              CONFIGURATION                                 */
+/* -------------------------------------------------------------------------- */
+
 const SUPPORTED_EXTENSIONS = [".js", ".ts", ".py", ".php"];
 const OUTPUT_DIR = path.join(process.cwd(), "docs");
 
-/** Récupère tous les fichiers de code dans un dossier (récursif) */
+/* -------------------------------------------------------------------------- */
+/*                         FONCTIONS UTILITAIRES                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Récupère récursivement tous les fichiers de code pris en charge dans un dossier.
+ * @param {string} dir - Dossier à parcourir
+ * @returns {string[]} Liste complète des fichiers de code
+ */
 function getAllCodeFiles(dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   const files = [];
@@ -20,57 +32,102 @@ function getAllCodeFiles(dir) {
       files.push(fullPath);
     }
   }
+
   return files;
 }
 
-/** Génère la doc HTML pour un fichier via OpenAI */
-async function generateDocForFile(client, code) {
-  const input = `${PROMPT}\n${code}`;
-  const response = await client.responses.create({
-    model: MODEL,
-    input: [
-      {
-        role: ROLE,
-        content: input,
-      },
-    ],
-  });
-  return response.output_text || response.output?.[0]?.content?.[0]?.text || "";
+/**
+ * Construit la structure hiérarchique des dossiers et fichiers à partir d'une liste de chemins.
+ * @param {string[]} files - Liste des fichiers à structurer
+ * @param {string} rootDir - Dossier racine
+ * @returns {object} Structure hiérarchique pour la génération de la sidebar
+ */
+function buildFileStructure(files, rootDir) {
+  const structure = {};
+
+  for (const file of files) {
+    const relativePath = path.relative(rootDir, file);
+    const parts = relativePath.split(path.sep);
+    const fileName = parts.pop();
+    let current = structure;
+
+    for (const part of parts) {
+      if (!current[part]) current[part] = {};
+      current = current[part];
+    }
+
+    if (!current.files) current.files = [];
+    current.files.push(fileName);
+  }
+
+  return structure;
 }
 
-/** Génère les liens de la sidebar avec compatibilité sous-dossiers */
-function generateSidebarLinks(structure, currentFilePath = "") {
-  return Object.entries(structure)
-    .map(([category, files]) => {
-      const links = files
+/**
+ * Formate un nom de fichier en supprimant les extensions et en rendant le nom plus lisible.
+ * @param {string} name - Nom du fichier sans extension
+ * @returns {string} Nom formaté (capitalisé et espacé)
+ */
+function formatFileName(name) {
+  return name
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Génère les liens HTML pour la sidebar (supporte les sous-dossiers récursifs).
+ * @param {object} structure - Structure des fichiers et dossiers
+ * @param {string} currentFilePath - Chemin du fichier courant (ex: "utils/math.html")
+ * @param {string} basePath - Chemin de base relatif courant
+ * @returns {string} HTML de la sidebar
+ */
+function generateSidebarLinks(structure, currentFilePath = "", basePath = "") {
+  let html = "";
+
+  for (const [key, value] of Object.entries(structure)) {
+    if (key === "files") {
+      // Liste des fichiers à ce niveau
+      const links = value
         .map((file) => {
           const fileName = path.basename(file, path.extname(file));
-          const relativePath = path.relative(
-            path.dirname(currentFilePath),
-            path.join(category, `${fileName}.html`)
-          );
+          const relativePath = path
+            .relative(path.dirname(currentFilePath), path.join(basePath, `${fileName}.html`))
+            .replace(/\\/g, "/");
+
           return `
             <li>
               <a href="${relativePath}"
                  class="block px-3 py-1.5 rounded-md text-gray-800/90 hover:text-blue-600 hover:bg-white/40 transition-all duration-200">
-                ${fileName}
+                ${formatFileName(fileName)}
               </a>
             </li>
           `;
         })
         .join("\n");
 
-      return `
+      html += `<ul class="space-y-1">${links}</ul>`;
+    } else if (typeof value === "object") {
+      // Dossier imbriqué
+      html += `
         <div class="mb-5">
-          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-600/80 mb-2">${category}</h3>
-          <ul class="space-y-1">${links}</ul>
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-600/80 mb-2">${key}</h3>
+          ${generateSidebarLinks(value, currentFilePath, path.join(basePath, key))}
         </div>
       `;
-    })
-    .join("\n");
+    }
+  }
+
+  return html;
 }
 
-/** Template HTML avec design iOS-style glassmorphism via Tailwind */
+/**
+ * Génère le squelette HTML complet (page + sidebar + contenu).
+ * @param {string} title - Titre du fichier/document
+ * @param {string} bodyContent - Contenu HTML généré par le modèle
+ * @param {object} structure - Structure des fichiers pour la navigation
+ * @param {string} currentFilePath - Chemin relatif du fichier courant
+ * @returns {string} HTML complet prêt à écrire
+ */
 function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
   const sidebarLinks = generateSidebarLinks(structure, currentFilePath);
 
@@ -101,7 +158,6 @@ function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
     <main class="flex-1 ml-72 p-12">
       <div class="bg-white/60 backdrop-blur-xl border border-white/40 rounded-3xl shadow-2xl p-10 max-w-5xl mx-auto">
         <h1 class="text-4xl font-bold mb-8 text-gray-900/90 tracking-tight">${title}</h1>
-
         <div class="prose prose-gray max-w-none text-gray-800 leading-relaxed">
           ${bodyContent}
         </div>
@@ -110,7 +166,7 @@ function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
   </div>
 
   <script>
-    // Défilement doux pour les ancres internes
+    // Défilement fluide pour les ancres internes
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener("click", function (e) {
         e.preventDefault();
@@ -125,14 +181,34 @@ function wrapInTemplate(title, bodyContent, structure, currentFilePath = "") {
 `;
 }
 
-/** Fonction principale */
+/**
+ * Appelle l'API OpenAI pour générer la documentation HTML d'un fichier.
+ * @param {OpenAI} client - Instance du client OpenAI
+ * @param {string} code - Contenu du fichier source
+ * @returns {Promise<string>} HTML généré
+ */
+async function generateDocForFile(client, code) {
+  const input = `${PROMPT}\n${code}`;
+
+  const response = await client.responses.create({
+    model: MODEL,
+    input: [{ role: ROLE, content: input }],
+  });
+
+  return response.output_text || response.output?.[0]?.content?.[0]?.text || "";
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                MAIN LOGIC                                  */
+/* -------------------------------------------------------------------------- */
+
 async function run() {
   try {
     const openaiApiKey = core.getInput("openai_api_key", { required: true });
     const targetPath = core.getInput("path", { required: true });
 
     const client = new OpenAI({ apiKey: openaiApiKey });
-    core.info(`Scanning code folder: ${targetPath}`);
+    core.info(`Scanning source folder: ${targetPath}`);
 
     const codeFiles = getAllCodeFiles(targetPath);
     if (!codeFiles.length) {
@@ -140,27 +216,8 @@ async function run() {
       return;
     }
 
-    const structure = {};
+    const structure = buildFileStructure(codeFiles, targetPath);
 
-    // Construit la structure imbriquée
-    for (const file of codeFiles) {
-      const relativePath = path.relative(targetPath, file);
-      const parts = relativePath.split(path.sep);
-      const fileName = parts.pop(); // Retire le nom du fichier
-      let current = structure;
-
-      // Parcourt les sous-dossiers si présents
-      for (const part of parts) {
-        if (!current[part]) current[part] = {};
-        current = current[part];
-      }
-
-      // Ajoute le fichier au niveau courant
-      if (!current.files) current.files = [];
-      current.files.push(fileName);
-    }
-
-    // Génère la doc pour chaque fichier
     for (const file of codeFiles) {
       const relativePath = path.relative(targetPath, file);
       const outputDir = path.join(OUTPUT_DIR, path.dirname(relativePath));
@@ -168,18 +225,25 @@ async function run() {
 
       const fileName = path.basename(file, path.extname(file));
       const code = fs.readFileSync(file, "utf-8");
-      const htmlBody = await generateDocForFile(client, code);
-      const currentFilePath = path.join(path.dirname(relativePath), `${fileName}.html`).replace(/\\/g, "/");
 
+      core.info(`Generating documentation for: ${relativePath}`);
+      const htmlBody = await generateDocForFile(client, code);
+
+      const currentFilePath = path.join(path.dirname(relativePath), `${fileName}.html`).replace(/\\/g, "/");
       const fullHTML = wrapInTemplate(fileName, htmlBody, structure, currentFilePath);
+
       fs.writeFileSync(path.join(outputDir, `${fileName}.html`), fullHTML, "utf-8");
-      core.info(`Generated doc for ${relativePath}`);
+      core.info(`Documentation generated for ${relativePath}`);
     }
 
-    core.info(`Documentation generated successfully in ${OUTPUT_DIR}`);
+    core.info(`All documentation generated successfully in: ${OUTPUT_DIR}`);
   } catch (error) {
     core.setFailed(`Failed to generate documentation: ${error.message}`);
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/*                              EXECUTION                                     */
+/* -------------------------------------------------------------------------- */
 
 run();
