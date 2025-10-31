@@ -51,7 +51,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate documentation
-        uses: agasparo/ia-doc-maker@v2.1.0
+        uses: agasparo/ia-doc-maker@v2.0.0
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           path: ${{ github.event.inputs.code_folder }}
